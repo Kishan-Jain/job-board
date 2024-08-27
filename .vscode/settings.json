@@ -6,5 +6,6 @@
     "outline.showTypeParameters": false,
     "javascript.inlayHints.parameterNames.suppressWhenArgumentMatchesName": false,
     "typescript.inlayHints.parameterNames.suppressWhenArgumentMatchesName": false,
-    "autoDocstring.guessTypes": false
+    "autoDocstring.guessTypes": false,
+    "editor.wordWrap": "on"
 }

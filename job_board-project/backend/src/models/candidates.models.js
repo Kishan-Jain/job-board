@@ -29,13 +29,57 @@ const CandidatesSchema = new Schema({
     avatar : {
         type : String,
     },
+    connectionsRequestWithEmployees : [{
+        EmployeeId :  {
+            type : Schema.Types.ObjectId,
+            ref : "Employee",
+        },
+        status : {
+            type:Boolean,
+            default : panding
+        },
+        joinDate : {
+            type : Date
+        }
+    }],
+    connectionsRequestWithCandidates : [{
+        CandidateId :  {
+            type : Schema.Types.ObjectId,
+            ref : "Candidate",
+        },
+        status : {
+            type:Boolean,
+            default : panding
+        },
+        joinDate : {
+            type : Date
+        }
+    }],
     connectionsWithEmployees : [{
-        type : Schema.Types.ObjectId,
-        ref : "Employee"
+        EmployeeId :  {
+            type : Schema.Types.ObjectId,
+            ref : "Employee",
+        },
+        status : {
+            type:Boolean,
+            default : panding
+        },
+        joinDate : {
+            type : Date
+        }
     }],
     connectionsWithCandidates : [{
-        type : Schema.Types.ObjectId,
-        ref : "Candidate"
+        CandidateId :  {
+            type : Schema.Types.ObjectId,
+            ref : "Candidate",
+        },
+        status : {
+            type:Boolean,
+            default : panding
+        },
+        joinDate : {
+            type : Date
+        }
     }],
     followingByEmployees : [{
         type : Schema.Types.ObjectId,
@@ -63,9 +107,17 @@ const CandidatesSchema = new Schema({
                 message : String,
                 time : Date
             }],
+            receivedMediaFile : [{
+                fileUrl:String,
+                time:Date
+            }],
             sendMessage : [{
                 message : String,
                 time : Date
+            }],
+            sendMediaFile : [{
+                fileUrl:String,
+                time:Date
             }]
         }
     }],
