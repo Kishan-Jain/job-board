@@ -23,30 +23,3 @@ export const GenrateAccessRefreshToken = async function (user) {
     return {accessToken, refreshToken}
 }
 
-export const reGeneratedAccessToken = async function (user) {
-    if(!user){
-        throw new ApiError(400, "DataError : User not received")
-    }
-    let userData
-    try {
-        userData = jwt.verify(user?.refreshToken, 
-            process.env.REFRESH_TOKEN_SECRET_KEY
-        )
-    } catch (error) {
-        throw new ApiError(500, `JWTError : ${error.message ||"Unable to varify jwt string"}`)
-    }
-    if(!userData){
-        throw new ApiError(400, `DBError : Your RefreshToken Expire or not validate, please login`)
-    }
-
-    let accessToken;
-    try {
-        accessToken = await user.GenrateAccessToken()
-    } catch (error) {
-        throw new ApiError(500, `DbError : ${error.message || "Enable to generated access token"}`)
-    }
-    if(!accessToken){
-        throw new ApiError(500, "DbError : AccessToken not generated")
-    }
-    return accessToken
-}

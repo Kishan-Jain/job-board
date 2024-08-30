@@ -160,7 +160,7 @@ EmployeeSchema.methods.checkPasswordCorrect = async function (password) {
 EmployeeSchema.methods.generateAccessToken() = async function () {
 	return await jwt.sign({
 		_id: this._id,
-		email: this.emailId
+    userType : "Candidate"
 	},
 		process.env.ACCESS_TOKEN_SECRET_KEY,
 		{
@@ -171,8 +171,7 @@ EmployeeSchema.methods.generateAccessToken() = async function () {
 EmployeeSchema.methods.generateRefreshToken() = async function () {
 	return await jwt.sign({
 		_id: this._id,
-		email: this.emailId,
-
+    userType : "Candidate"
 	},
 		process.env.REFRESH_TOKEN_SECRET_KEY,
 		{

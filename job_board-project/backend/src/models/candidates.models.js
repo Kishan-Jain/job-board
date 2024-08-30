@@ -16,6 +16,13 @@ const CandidatesSchema = new Schema({
         type : String,
         required : [true, "EmailId is required"],
     },
+    field : {
+        type:String,
+        required : true
+    },
+    keySkills : [{
+        type : String 
+    }],
     lastLogin : {
         type : Date
     },
@@ -28,6 +35,7 @@ const CandidatesSchema = new Schema({
     },
     avatar : {
         type : String,
+        
     },
     connectionsRequestWithEmployees : [{
         EmployeeId :  {
@@ -157,7 +165,7 @@ CandidatesSchema.methods.checkPasswordCorrect = async function(password){
 CandidatesSchema.methods.generateAccessToken() = async function () {
     return await jwt.sign({
         _id : this._id,
-        email : this.emailId
+        userType : "Candidate"
     },
     process.env.ACCESS_TOKEN_SECRET_KEY,
     {
@@ -168,8 +176,7 @@ CandidatesSchema.methods.generateAccessToken() = async function () {
 CandidatesSchema.methods.generateRefreshToken() = async function () {
     return await jwt.sign({
         _id : this._id,
-        email : this.emailId,
-
+        userType : "Candidate"
     },
     process.env.REFRESH_TOKEN_SECRET_KEY,
     {

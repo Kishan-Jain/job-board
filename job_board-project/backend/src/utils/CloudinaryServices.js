@@ -17,11 +17,10 @@ export const uploadToCloudinary = async function (fileLocationPath) {
     uploadResponce = await cloudinary.uploader.upload(fileLocationPath, {
       resource_type: "auto",
     });
-    console.log(uploadResultUrl);
-    return uploadResultUrl;
   } catch (error) {
     throw new ApiError(500, `CloudinaryServerError : ${error.message || "unable to upload file in cloudinary"}`)
   }
+  return uploadResultUrl;
 };
 
 // Remove files
