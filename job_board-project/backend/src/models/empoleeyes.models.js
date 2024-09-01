@@ -141,11 +141,14 @@ const EmployeeSchema = new Schema({
 			type:Date,
 			default:Date.now
 		}
-}
-],
+	}],
 	previousJobsArray: [{
-		type: Schema.Types.ObjectId,
-		ref: "Job"
+		jobId : {
+			type: Schema.Types.ObjectId,
+			ref: "Job"
+			}, 
+		jobAddDate : Date,
+		addDate : Date
 	}]
 }, { timestamps: true })
 

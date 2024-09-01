@@ -35,7 +35,7 @@ const JobSchema = new Schema({
         type:Number,
         default : 1
     },
-    maxApplication : {
+    maxApplications : {
         type:Number,
         default : 1000
     },
@@ -47,7 +47,7 @@ const JobSchema = new Schema({
         type : Date,
         required : true
     },
-    application_array : [{
+    applicationArray : [{
         type : Schema.Types.ObjectId,
         ref : "Application"
     }],

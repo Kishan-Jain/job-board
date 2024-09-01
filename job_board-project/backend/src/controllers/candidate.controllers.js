@@ -220,10 +220,10 @@ export const logoutCandidate = AsyncHandler(async (req, res) => {
     throw new ApiError(400, "Candidate not login, please login first")
   }
   if(req.userType !== "Candidate"){
-    throw new ApiError(409, "LoginError : Unaurtorize Access")
+    throw new ApiError(409, "LoginError : Unauthorize Access")
   }
   if(req.params?.userId !== req.userId){
-    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+    throw new ApiError(409, "ParamsError : Unauthorize Access")
   }
 
   // update Candidate field
@@ -265,10 +265,10 @@ export const updateCandidateFullName = AsyncHandler(async (req, res) => {
     throw new ApiError(400, "Candidate not login, please login first")
   }
   if(req.userType !== "Candidate"){
-    throw new ApiError(409, "LoginError : Unaurtorize Access")
+    throw new ApiError(409, "LoginError : Unauthorize Access")
   }
   if(req.params?.userId !== req.userId){
-    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+    throw new ApiError(409, "ParamsError : Unauthorize Access")
   }
 
   // check data received from body
@@ -324,10 +324,10 @@ export const updateCandidateField = AsyncHandler(async (req, res) => {
     throw new ApiError(400, "Candidate not login, please login first")
   }
   if(req.userType !== "Candidate"){
-    throw new ApiError(409, "LoginError : Unaurtorize Access")
+    throw new ApiError(409, "LoginError : Unauthorize Access")
   }
   if(req.params?.userId !== req.userId){
-    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+    throw new ApiError(409, "ParamsError : Unauthorize Access")
   }
 
   // check data received from body
@@ -382,10 +382,10 @@ if(!req.userId){
   throw new ApiError(400, "Candidate not login, please login first")
 }
 if(req.userType !== "Candidate"){
-  throw new ApiError(409, "LoginError : Unaurtorize Access")
+  throw new ApiError(409, "LoginError : Unauthorize Access")
 }
 if(req.params?.userId !== req.userId){
-  throw new ApiError(409, "ParamsError : Unaurtorize Access")
+  throw new ApiError(409, "ParamsError : Unauthorize Access")
 }
 
 // check data received from body
@@ -445,10 +445,10 @@ if(!req.userId){
   throw new ApiError(400, "Candidate not login, please login first")
 }
 if(req.userType !== "Candidate"){
-  throw new ApiError(409, "LoginError : Unaurtorize Access")
+  throw new ApiError(409, "LoginError : Unauthorize Access")
 }
 if(req.params?.userId !== req.userId){
-  throw new ApiError(409, "ParamsError : Unaurtorize Access")
+  throw new ApiError(409, "ParamsError : Unauthorize Access")
 }
 
 // check data received from body
@@ -507,10 +507,10 @@ if(!req.userId){
   throw new ApiError(400, "Candidate not login, please login first")
 }
 if(req.userType !== "Candidate"){
-  throw new ApiError(409, "LoginError : Unaurtorize Access")
+  throw new ApiError(409, "LoginError : Unauthorize Access")
 }
 if(req.params?.userId !== req.userId){
-  throw new ApiError(409, "ParamsError : Unaurtorize Access")
+  throw new ApiError(409, "ParamsError : Unauthorize Access")
 }
 
 // check data received from body
@@ -575,10 +575,10 @@ if(!req.userId){
   throw new ApiError(400, "Candidate not login, please login first")
 }
 if(req.userType !== "Candidate"){
-  throw new ApiError(409, "LoginError : Unaurtorize Access")
+  throw new ApiError(409, "LoginError : Unauthorize Access")
 }
 if(req.params?.userId !== req.userId){
-  throw new ApiError(409, "ParamsError : Unaurtorize Access")
+  throw new ApiError(409, "ParamsError : Unauthorize Access")
 }
 
 // check data received from body
@@ -657,10 +657,10 @@ export const changeCandidatePassword = AsyncHandler(async (req, res) => {
     throw new ApiError(400, "Candidate not login, please login first")
   }
   if(req.userType !== "Candidate"){
-    throw new ApiError(409, "LoginError : Unaurtorize Access")
+    throw new ApiError(409, "LoginError : Unauthorize Access")
   }
   if(req.params?.userId !== req.userId){
-    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+    throw new ApiError(409, "ParamsError : Unauthorize Access")
   }
 
   // check data received from body
@@ -729,10 +729,10 @@ export const deleteCandidate = AsyncHandler(async (req, res) => {
     throw new ApiError(400, "Candidate not login, please login first")
   }
   if(req.userType !== "Candidate"){
-    throw new ApiError(409, "LoginError : Unaurtorize Access")
+    throw new ApiError(409, "LoginError : Unauthorize Access")
   }
   if(req.params?.userId !== req.userId){
-    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+    throw new ApiError(409, "ParamsError : Unauthorize Access")
   }
   // serch Candidate by user id
   let searchCandidate
@@ -768,10 +768,10 @@ if(!req.userId){
   throw new ApiError(400, "Candidate not login, please login first")
 }
 if(req.userType !== "Candidate"){
-  throw new ApiError(409, "LoginError : Unaurtorize Access")
+  throw new ApiError(409, "LoginError : Unauthorize Access")
 }
 if(req.params?.userId !== req.userId){
-  throw new ApiError(409, "ParamsError : Unaurtorize Access")
+  throw new ApiError(409, "ParamsError : Unauthorize Access")
 }
 // search Candidate
   let searchCandidate
@@ -802,10 +802,10 @@ if(!req.userId){
   throw new ApiError(400, "Candidate not login, please login first")
 }
 if(req.userType !== "Candidate"){
-  throw new ApiError(409, "LoginError : Unaurtorize Access")
+  throw new ApiError(409, "LoginError : Unauthorize Access")
 }
 if(req.params?.userId !== req.userId){
-  throw new ApiError(409, "ParamsError : Unaurtorize Access")
+  throw new ApiError(409, "ParamsError : Unauthorize Access")
 }
 
 // check file is upload by multer 
@@ -880,10 +880,10 @@ export const removeAvatar = AsyncHandler(async (req, res) => {
     throw new ApiError(400, "Candidate not login, please login first")
   }
   if(req.userType !== "Candidate"){
-    throw new ApiError(409, "LoginError : Unaurtorize Access")
+    throw new ApiError(409, "LoginError : Unauthorize Access")
   }
   if(req.params?.userId !== req.userId){
-    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+    throw new ApiError(409, "ParamsError : Unauthorize Access")
   }
 // search Candidate data by userId
   let searchCandidate
@@ -937,10 +937,10 @@ if(!req.userId){
   throw new ApiError(400, "Candidate not login, please login first")
 }
 if(req.userType !== "Candidate"){
-  throw new ApiError(409, "LoginError : Unaurtorize Access")
+  throw new ApiError(409, "LoginError : Unauthorize Access")
 }
 if(req.params?.userId !== req.userId){
-  throw new ApiError(409, "ParamsError : Unaurtorize Access")
+  throw new ApiError(409, "ParamsError : Unauthorize Access")
 }
 // search Candidate data by userId
 let searchCandidate
@@ -1004,10 +1004,10 @@ if(!req.userId){
   throw new ApiError(400, "Candidate not login, please login first")
 }
 if(req.userType !== "Candidate"){
-  throw new ApiError(409, "LoginError : Unaurtorize Access")
+  throw new ApiError(409, "LoginError : Unauthorize Access")
 }
 if(req.params?.userId !== req.userId){
-  throw new ApiError(409, "ParamsError : Unaurtorize Access")
+  throw new ApiError(409, "ParamsError : Unauthorize Access")
 }
 // search Candidate data by userId
 let searchCandidate
@@ -1033,10 +1033,10 @@ export const getAllResume = AsyncHandler(async (req, res) => {
     throw new ApiError(400, "Candidate not login, please login first")
   }
   if(req.userType !== "Candidate"){
-    throw new ApiError(409, "LoginError : Unaurtorize Access")
+    throw new ApiError(409, "LoginError : Unauthorize Access")
   }
   if(req.params?.userId !== req.userId){
-    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+    throw new ApiError(409, "ParamsError : Unauthorize Access")
   }
 // search Candidate data by userId
   let searchCandidate
@@ -1063,10 +1063,10 @@ export const getAllJobsByKeySkills = AsyncHandler(async (req, res) => {
     throw new ApiError(400, "Candidate not login, please login first")
   }
   if(req.userType !== "Candidate"){
-    throw new ApiError(409, "LoginError : Unaurtorize Access")
+    throw new ApiError(409, "LoginError : Unauthorize Access")
   }
   if(req.params?.userId !== req.userId){
-    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+    throw new ApiError(409, "ParamsError : Unauthorize Access")
   }
 // search Candidate data by userId
   let searchCandidate
@@ -1091,10 +1091,10 @@ export const getAllJobsbyFilter = AsyncHandler(async (req, res) => {
     throw new ApiError(400, "Candidate not login, please login first")
   }
   if(req.userType !== "Candidate"){
-    throw new ApiError(409, "LoginError : Unaurtorize Access")
+    throw new ApiError(409, "LoginError : Unauthorize Access")
   }
   if(req.params?.userId !== req.userId){
-    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+    throw new ApiError(409, "ParamsError : Unauthorize Access")
   }
 // search Candidate data by userId
   let searchCandidate
@@ -1120,10 +1120,10 @@ export const getAllApplications = AsyncHandler(async (req, res) => {
     throw new ApiError(400, "Candidate not login, please login first")
   }
   if(req.userType !== "Candidate"){
-    throw new ApiError(409, "LoginError : Unaurtorize Access")
+    throw new ApiError(409, "LoginError : Unauthorize Access")
   }
   if(req.params?.userId !== req.userId){
-    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+    throw new ApiError(409, "ParamsError : Unauthorize Access")
   }
 // search Candidate data by userId
   let searchCandidate
@@ -1149,10 +1149,10 @@ export const getAllSortedApplications = AsyncHandler(async (req, res) => {
     throw new ApiError(400, "Candidate not login, please login first")
   }
   if(req.userType !== "Candidate"){
-    throw new ApiError(409, "LoginError : Unaurtorize Access")
+    throw new ApiError(409, "LoginError : Unauthorize Access")
   }
   if(req.params?.userId !== req.userId){
-    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+    throw new ApiError(409, "ParamsError : Unauthorize Access")
   }
 // search Candidate data by userId
   let searchCandidate
@@ -1179,10 +1179,10 @@ export const getApplicationDetails = AsyncHandler(async (req, res) => {
     throw new ApiError(400, "Candidate not login, please login first")
   }
   if(req.userType !== "Candidate"){
-    throw new ApiError(409, "LoginError : Unaurtorize Access")
+    throw new ApiError(409, "LoginError : Unauthorize Access")
   }
   if(req.params?.userId !== req.userId){
-    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+    throw new ApiError(409, "ParamsError : Unauthorize Access")
   }
 // search Candidate data by userId
   let searchCandidate
@@ -1209,10 +1209,10 @@ export const checkApplicationStatus = AsyncHandler(async (req, res) => {
     throw new ApiError(400, "Candidate not login, please login first")
   }
   if(req.userType !== "Candidate"){
-    throw new ApiError(409, "LoginError : Unaurtorize Access")
+    throw new ApiError(409, "LoginError : Unauthorize Access")
   }
   if(req.params?.userId !== req.userId){
-    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+    throw new ApiError(409, "ParamsError : Unauthorize Access")
   }
 // search Candidate data by userId
   let searchCandidate
@@ -1240,10 +1240,10 @@ export const getEmployeeDetails = AsyncHandler(async (req, res) => {
     throw new ApiError(400, "Candidate not login, please login first")
   }
   if(req.userType !== "Candidate"){
-    throw new ApiError(409, "LoginError : Unaurtorize Access")
+    throw new ApiError(409, "LoginError : Unauthorize Access")
   }
   if(req.params?.userId !== req.userId){
-    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+    throw new ApiError(409, "ParamsError : Unauthorize Access")
   }
   // check Employee id received from parameters
   if(!req.params?.employeeId){
