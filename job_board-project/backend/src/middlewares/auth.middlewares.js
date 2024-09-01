@@ -16,10 +16,11 @@ export const isLogin = AsyncHandler(async (req, res, next) => {
    * if accessToken not available, so regenrate it.
    * decode accessToken and store data on request parameter and next function call  
    */
+  // check refresh token availabel
   if(!req.cookies["refreshToken"]){
     throw new ApiError(409, "loginError : Refresh token not available, please login first")
   }
-
+  // decode refresh token
   let decodeRefreshToken;
   try {
     decodeRefreshToken = await jwt.verify(
@@ -32,39 +33,44 @@ export const isLogin = AsyncHandler(async (req, res, next) => {
   if(!decodeRefreshToken){
     throw new ApiError(409, "loginError : Refresh token not valid, please clear cookie and login again")
   }
-  
-  const userType = decodeRefreshToken?.userType
- 
+  // check access token availabel
   if(!req.cookies["accessToken"]){
+    const userType = decodeRefreshToken?.userType
+    const userId = decodeRefreshToken?._id
     if(userType === "Employee"){
       try {
-        req.cookie("accessToken", await Employee.findById(decodeRefreshToken._id).generateAccessToken(), accessTokenCookieOption)
+        const user = await Employee.findById(decodeRefreshToken._id)
+        const accessToken = await user.GenerateAccessToken()
+        res.cookie("accessToken", accessToken, accessTokenCookieOption)
       } catch (error) {
         throw new ApiError(500, `DBError : ${error.message || "unable to generate accessToken"}`)
       }
     } else if(userType === "Candidate"){
       try {
-        req.cookie("accessToken", await Candidate.findById(decodeRefreshToken._id).generateAccessToken(), accessTokenCookieOption)
+        const user = await Candidate.findById(decodeRefreshToken._id)
+        const accessToken = await user.GenerateAccessToken()
+        res.cookie("accessToken", accessToken, accessTokenCookieOption)
       } catch (error) {
         throw new ApiError(500, `DBError : ${error.message || "unable to generate accessToken"}`)
       }
     }
+    console.log("accessToken regenerated")
   } 
-
+  // decode access token
   let decodeAccessToken;
   try {
     decodeAccessToken = await jwt.verify(
-      req.cookies["accessToken"],
+      req.cookies?.accessToken,
       process.env.ACCESS_TOKEN_SECRET_KEY
     )
   } catch (error) {
     throw new ApiError(500, `jwtError : ${error.message || "unable to decode accessToken"}`)
     
   }
-  if(decodeAccessToken){
+  if(!decodeAccessToken){
     throw new ApiError(409, `jwtError : Access token not valid, please clear cookie and login again`)
   }
-
+  // set userId and userType in requst object
   req.userId = decodeAccessToken._id
   req.userType = decodeAccessToken.userType
   next()
@@ -75,8 +81,10 @@ export const ifAlreadyLogin = AsyncHandler(async (req, res, next) => {
    * chack user not login, if accessToken and refreshTokene available in cookies, so throw error
    * either call next function
    */
+  // check refresh token available
   if(req.cookies["refreshToken"]){
     throw new ApiError(500, "loginError : user is already login, please logout or clear cookies")
   }
+  // call next function
   next()
 })

@@ -9,12 +9,12 @@ export const GenrateAccessRefreshToken = async function (user) {
     }
     let accessToken, refreshToken;
     try {
-        accessToken = await user.GenrateAccessToken()
-        refreshToken = await user.GenrateRefreshToken() 
+        accessToken = await user.GenerateAccessToken()
+        refreshToken = await user.GenerateRefreshToken() 
     } catch (error) {
         throw new ApiError(500, `DbError : ${error.message || "Unable to generate Tokens"}`)
     }
-    if(![accessToken, refreshToken].some(field => field)){
+    if([accessToken, refreshToken].some(field => field === undefined)){
         throw new ApiError(500, "Tokens not Genrated")
     }
     if([accessToken, refreshToken].some(field => field.toString().trim() === "")){

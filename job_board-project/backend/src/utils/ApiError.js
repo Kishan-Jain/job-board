@@ -4,7 +4,8 @@ export default class ApiError extends Error {
         massage = "Throw Error Messages",
         errors = [],
         stack = ""
-    ){
+    ){  
+        super(massage)
         this.data = null
         this.statusCode = statusCode
         this.message = this.message

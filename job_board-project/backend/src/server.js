@@ -12,7 +12,7 @@ const db_name = process.env.DATABASE_NAME
 connectDb(db_uri, db_name)
 .then(
     app.listen(port, function(){
-        console.log(`server listen on ${host}/${port}`)
+        console.log(`server listen on ${host}${port}`)
     })
 )
 .catch(error => (

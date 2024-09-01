@@ -44,7 +44,7 @@ const CandidatesSchema = new Schema({
         },
         status : {
             type:Boolean,
-            default : panding
+            default : "pending"
         },
         joinDate : {
             type : Date
@@ -57,7 +57,7 @@ const CandidatesSchema = new Schema({
         },
         status : {
             type:Boolean,
-            default : panding
+            default : "pending"
         },
         joinDate : {
             type : Date
@@ -70,7 +70,7 @@ const CandidatesSchema = new Schema({
         },
         status : {
             type:Boolean,
-            default : panding
+            default : "pending"
         },
         joinDate : {
             type : Date
@@ -83,7 +83,7 @@ const CandidatesSchema = new Schema({
         },
         status : {
             type:Boolean,
-            default : panding
+            default : "pending"
         },
         joinDate : {
             type : Date
@@ -162,7 +162,7 @@ CandidatesSchema.methods.checkPasswordCorrect = async function(password){
 }
 
 // generate AccessRefreshTokens
-CandidatesSchema.methods.generateAccessToken() = async function () {
+CandidatesSchema.methods.GenerateAccessToken = async function () {
     return await jwt.sign({
         _id : this._id,
         userType : "Candidate"
@@ -173,7 +173,7 @@ CandidatesSchema.methods.generateAccessToken() = async function () {
     }
     )
 }
-CandidatesSchema.methods.generateRefreshToken() = async function () {
+CandidatesSchema.methods.GenerateRefreshToken = async function () {
     return await jwt.sign({
         _id : this._id,
         userType : "Candidate"

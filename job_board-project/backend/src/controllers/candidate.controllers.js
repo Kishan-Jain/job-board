@@ -28,7 +28,7 @@
 import AsyncHandler from "../utils/AsyncHandler.js"
 import ApiError from "../utils/ApiError.js"
 import ApiResponce from "../utils/ApiResponce.js"
-import Candidate from "../models/empoleeyes.models.js"
+import Candidate from "../models/candidates.models.js"
 import Employee from "../models/empoleeyes.models.js"
 import {accessTokenCookieOption, refreshTokenCookieOption} from "../constants.js"
 import {uploadToCloudinary, removeToCloudinary} from "../utils/CloudinaryServices.js"
@@ -63,12 +63,12 @@ export const registerCandidate = AsyncHandler(async (req, res) => {
 
   // validate data 
   if (
-    ![
+    [
       emailId,
       fullName,
       password,
       field
-    ].some((field) => field)
+    ].some((field) => field === undefined)
   ) {
     throw new ApiError(404, "DataError : All field is required")
   }
@@ -155,7 +155,7 @@ export const loginCandidate = AsyncHandler(async (req, res) => {
   const { emailId, password } = req.body;
 
   // validate data  
-  if (![emailId, password].some((field) => field)) {
+  if ([emailId, password].some((field) => field === undefined)) {
     throw new ApiError(404, "dataError : All field is required")
   }
   if ([emailId, password].some((field) => field?.toString().trim() === "")) {
@@ -189,7 +189,7 @@ export const loginCandidate = AsyncHandler(async (req, res) => {
   try {
     updateSearchCandidate = await Candidate.findByIdAndUpdate(searchCandidate._id, {
       $set : {
-        lastLogin : Date.now
+        lastLogin : Date.now()
       }
     }, {new:true}).select("-password -__v")
   } catch (error) {
@@ -232,7 +232,7 @@ export const logoutCandidate = AsyncHandler(async (req, res) => {
     updateCandidate = await Candidate.findByIdAndUpdate(req.userId,
       {
         $set : {
-          lastLogout : Date.now
+          lastLogout : Date.now()
         }
       }, {new:true}
     ).select("_id")
@@ -277,6 +277,12 @@ export const updateCandidateFullName = AsyncHandler(async (req, res) => {
   }
   // extract data from body
   const {fullName} = req.body
+  if(fullName === undefined){
+    throw new ApiError(404, "DataError : All field is required")
+  }
+  if(fullName === ""){
+    throw new ApiError(400, "DataError : No any field is Empty")
+  }
   // search Candidate by userId
   let searchCandidate
   try {
@@ -299,18 +305,9 @@ export const updateCandidateFullName = AsyncHandler(async (req, res) => {
   if(!updateCandidate){
     throw new ApiError(500, "DbError : Candidate not updated")
   }
-  // re generate accessToken
-  const accessToken = await updateCandidate.generateAccessToken()
-  if(!accessToken){
-    throw new ApiError(500, "DbError : AccessToken not generated")
-
-  }
-
-  // reset accessToken cookie and return responce with updated Candidate data
+  // return responce with updated Candidate data
   return res 
   .status(200)
-  .clearCookie("accessToken", accessTokenCookieOption)
-  .cookie("accessToken", accessToken ,accessTokenCookieOption)
   .json(new ApiResponce(200, updateCandidate, "successMessage : Candidate updated successfully"))
 });
 
@@ -339,6 +336,12 @@ export const updateCandidateField = AsyncHandler(async (req, res) => {
   }
   // extract data from body
   const {field} = req.body
+  if(field  === undefined){
+    throw new ApiError(404, "DataError : All field is required")
+  }
+  if (field === ""){
+    throw new ApiError(400, "DataError : No Any field is Empty")
+  }
   // search Candidate by userId
   let searchCandidate
   try {
@@ -361,35 +364,284 @@ export const updateCandidateField = AsyncHandler(async (req, res) => {
   if(!updateCandidate){
     throw new ApiError(500, "DbError : Candidate not updated")
   }
-  // re generate accessToken
-  const accessToken = await updateCandidate.generateAccessToken()
-  if(!accessToken){
-    throw new ApiError(500, "DbError : AccessToken not generated")
-
-  }
-
-  // reset accessToken cookie and return responce with updated Candidate data
+  // return responce with updated Candidate data
   return res 
   .status(200)
-  .clearCookie("accessToken", accessTokenCookieOption)
-  .cookie("accessToken", accessToken ,accessTokenCookieOption)
   .json(new ApiResponce(200, updateCandidate, "successMessage : Candidate updated successfully"))
 })
 
 export const addAreaOfIntrest = AsyncHandler(async (req, res) => {
+/**
+ * check candidate is login
+ * check data from body
+ * push data on Area of Intrest array
+ * return responce
+ */
+// check Candidate login
+if(!req.userId){
+  throw new ApiError(400, "Candidate not login, please login first")
+}
+if(req.userType !== "Candidate"){
+  throw new ApiError(409, "LoginError : Unaurtorize Access")
+}
+if(req.params?.userId !== req.userId){
+  throw new ApiError(409, "ParamsError : Unaurtorize Access")
+}
 
+// check data received from body
+if(!req.body){
+  throw new ApiError(404, "DataError : No any data received from body")
+}
+// extract data from body
+const {areaOfIntrest} = req.body
+if(areaOfIntrest  === undefined){
+  throw new ApiError(404, "DataError : All field is required")
+}
+if (areaOfIntrest === ""){
+  throw new ApiError(400, "DataError : No Any field is Empty")
+}
+// search Candidate by userId
+let searchCandidate
+try {
+  searchCandidate = await Candidate.findById(req.userId).select("-password")
+} catch (error) {
+  throw new ApiError(500, `DbError : ${error.message || "unable to find Candidate"}`)
+}
+if(!searchCandidate){
+  throw new ApiError(400, "DbError : Candidate not Found")
+}
+if((searchCandidate.areaOfIntrest.find(field => field === areaOfIntrest))){
+  throw new ApiError(404, "DataError : Intrest already exits")
+}
+// update Candidate
+let updateCandidate
+try {
+  updateCandidate = await Candidate.findByIdAndUpdate(searchCandidate._id, {
+    $push : {
+      areaOfIntrest
+    }
+  },{new:true}).select("-password -__v")
+} catch (error) {
+  throw new ApiError(500, `DbError : ${error.message || "unable to updated Candidate"}`)
+}
+if(!updateCandidate){
+  throw new ApiError(500, "DbError : Candidate not updated")
+}
+// return responce with updated data
+return res
+.status(200)
+.json(new ApiResponce(200, updateCandidate, "successMessage : Intrest add successfully"))
 })
 
 export const removeAreaOfIntrest = AsyncHandler(async (req, res) => {
+/**
+ * check candidate is login
+ * check intrest name on params
+ * pop data on Area of Intrest array
+ * return responce
+ */
+// check Candidate login
+if(!req.userId){
+  throw new ApiError(400, "Candidate not login, please login first")
+}
+if(req.userType !== "Candidate"){
+  throw new ApiError(409, "LoginError : Unaurtorize Access")
+}
+if(req.params?.userId !== req.userId){
+  throw new ApiError(409, "ParamsError : Unaurtorize Access")
+}
 
+// check data received from body
+if(!req.params?.intrestName){
+  throw new ApiError(404, "DataError : No any data received from body")
+}
+// extract data from params
+const {intrestName} = req.params
+if(intrestName  === undefined){
+  throw new ApiError(404, "DataError : All field is required")
+}
+if (intrestName === ""){
+  throw new ApiError(400, "DataError : No Any field is Empty")
+}
+// search Candidate by userId
+let searchCandidate
+try {
+  searchCandidate = await Candidate.findById(req.userId).select("-password")
+} catch (error) {
+  throw new ApiError(500, `DbError : ${error.message || "unable to find Candidate"}`)
+}
+if(!searchCandidate){
+  throw new ApiError(400, "DbError : Candidate not Found")
+}
+if(!(searchCandidate.areaOfIntrest.find(field => field === intrestName))){
+  throw new ApiError(404, "DataError : Intrest not found")
+}
+// update Candidate
+let updateCandidate
+try {
+  const newAreaOfIntrestArray = searchCandidate.areaOfIntrest.filter(field => field !== intrestName)
+  searchCandidate.areaOfIntrest = newAreaOfIntrestArray
+  await searchCandidate.save({validateBeforeSave:false})
+  updateCandidate = await Candidate.findById(searchCandidate._id).select("-password -__v")
+} catch (error) {
+  throw new ApiError(500, `DbError : ${error.message || "unable to updated Candidate"}`)
+}
+if(!updateCandidate){
+  throw new ApiError(500, "DbError : Candidate not updated")
+}
+// return responce with updated data
+return res
+.status(200)
+.json(new ApiResponce(200, updateCandidate, "successMessage : Intrest add successfully"))
 })
 
 export const addNewSkills = AsyncHandler(async (req, res) => {
+/**
+ * check candidate is login
+ * check data from body
+ * push data on skill array
+ * return responce
+ */
+// check Candidate login
+if(!req.userId){
+  throw new ApiError(400, "Candidate not login, please login first")
+}
+if(req.userType !== "Candidate"){
+  throw new ApiError(409, "LoginError : Unaurtorize Access")
+}
+if(req.params?.userId !== req.userId){
+  throw new ApiError(409, "ParamsError : Unaurtorize Access")
+}
 
+// check data received from body
+if(!req.body){
+  throw new ApiError(404, "DataError : No any data received from body")
+}
+// extract data from body
+const {newSkills} = req.body
+if(newSkills  === undefined){
+  throw new ApiError(404, "DataError : All field is required")
+}
+if (newSkills.length === 0){
+  throw new ApiError(400, "DataError : No Any field is Empty")
+}
+if (newSkills.some(field => field === "")){
+  throw new ApiError(400, "DataArrayError : No Any field is Empty")
+}
+// search Candidate by userId
+let searchCandidate
+try {
+  searchCandidate = await Candidate.findById(req.userId).select("-password")
+} catch (error) {
+  throw new ApiError(500, `DbError : ${error.message || "unable to find Candidate"}`)
+}
+if(!searchCandidate){
+  throw new ApiError(400, "DbError : Candidate not Found")
+}
+for (let skill of newSkills){
+    if((searchCandidate.keySkills.find(field => field === skill))){
+    throw new ApiError(404, `DataError : ${skill} already exits in skills array`)
+  }
+}
+// update Candidate
+let updateCandidate
+try {
+  const newSkillsArray = searchCandidate.keySkills.concat(newSkills)
+  
+  searchCandidate.keySkills = newSkillsArray
+  await searchCandidate.save({validateBeforeSave:false})
+  updateCandidate = await Candidate.findById(searchCandidate._id).select("-password -__v")
+} catch (error) {
+  throw new ApiError(500, `DbError : ${error.message || "unable to updated Candidate"}`)
+}
+if(!updateCandidate){
+  throw new ApiError(500, "DbError : Candidate not updated")
+}
+// return responce with updated data
+return res
+.status(200)
+.json(new ApiResponce(200, updateCandidate, "successMessage : new skill add successfully"))
 })
 
 export const removeSkills = AsyncHandler(async (req, res) => {
+/**
+ * check candidate is login
+ * check data from body
+ * push data on skill array
+ * return responce
+ */
+// check Candidate login
+if(!req.userId){
+  throw new ApiError(400, "Candidate not login, please login first")
+}
+if(req.userType !== "Candidate"){
+  throw new ApiError(409, "LoginError : Unaurtorize Access")
+}
+if(req.params?.userId !== req.userId){
+  throw new ApiError(409, "ParamsError : Unaurtorize Access")
+}
 
+// check data received from body
+if(!req.params?.skillsArray){
+  throw new ApiError(404, "DataError : No any data received from body")
+}
+// extract data from body
+let {skillsArray} = req.params
+if(skillsArray  === undefined){
+  throw new ApiError(404, "DataError : All field is required")
+}
+skillsArray = skillsArray.replace("[", "")
+skillsArray = skillsArray.replace("]", "")
+skillsArray = skillsArray.split(", ")
+if (skillsArray.length === 0){
+  throw new ApiError(400, "DataError : No Any field is Empty")
+}
+
+if (skillsArray?.some(field => field === "")){
+  throw new ApiError(400, "DataArrayError : No Any field is Empty")
+}
+// search Candidate by userId
+let searchCandidate
+try {
+  searchCandidate = await Candidate.findById(req.userId).select("-password")
+} catch (error) {
+  throw new ApiError(500, `DbError : ${error.message || "unable to find Candidate"}`)
+}
+if(!searchCandidate){
+  throw new ApiError(400, "DbError : Candidate not Found")
+}
+for (let skill of skillsArray){
+  
+  if((!searchCandidate.keySkills.find(field => field === skill))){
+    throw new ApiError(404, `DataError : ${skill} not exits in skills array`)
+  }
+}
+// update Candidate
+let updateCandidate
+try {
+  let newSkillsArray
+  for (let skill of skillsArray){
+    newSkillsArray = searchCandidate.keySkills.filter(value => value !== skill)
+    if(newSkillsArray === undefined){
+      throw new ApiError(500, "DbError : keySkills not removed")
+    }  
+    if (newSkillsArray === ""){
+      throw new ApiError(500, "dbError : keySkills remove error")
+    }
+    searchCandidate.keySkills = newSkillsArray
+    await searchCandidate.save({validateBeforeSave:false})
+  }
+  updateCandidate = await Candidate.findById(searchCandidate._id).select("-password -__v")
+} catch (error) {
+  throw new ApiError(500, `DbError : ${error.message || "unable to updated Candidate"}`)
+}
+if(!updateCandidate){
+  throw new ApiError(500, "DbError : Candidate not updated")
+}
+// return responce with updated data
+return res
+.status(200)
+.json(new ApiResponce(200, updateCandidate, "successMessage : skill remove successfully"))
 })
 
 
@@ -417,7 +669,7 @@ export const changeCandidatePassword = AsyncHandler(async (req, res) => {
   }
   // destruct data and validate
   const {oldPassword, newPassword} = req.body
-  if(![oldPassword, newPassword].some(field => field)){
+  if([oldPassword, newPassword].some(field => field === undefined)){
     throw new ApiError(404, "All field is required")
   }
   if([oldPassword, newPassword].some(field => field?.toString().trim() === "")){
@@ -426,7 +678,7 @@ export const changeCandidatePassword = AsyncHandler(async (req, res) => {
   // search Candidate by userId
   let searchCandidate
   try {
-    searchCandidate = await Candidate.findById(req.body).select("-__v")
+    searchCandidate = await Candidate.findById(req.userId).select("-__v")
   } catch (error) {
     throw new ApiError(500, `DbError : ${error.message || "Unable to search Candidate"}`)
   }
@@ -672,14 +924,130 @@ export const removeAvatar = AsyncHandler(async (req, res) => {
 });
 
 export const uploadNewResume = AsyncHandler(async (req, res) => {
+/**
+ * check candidate login
+ * check file received
+ * reteive file local path
+ * upload file in cloudinary
+ * push file cloudinary url in db resume array
+ * return responce
+ */
+// check Candidate login
+if(!req.userId){
+  throw new ApiError(400, "Candidate not login, please login first")
+}
+if(req.userType !== "Candidate"){
+  throw new ApiError(409, "LoginError : Unaurtorize Access")
+}
+if(req.params?.userId !== req.userId){
+  throw new ApiError(409, "ParamsError : Unaurtorize Access")
+}
+// search Candidate data by userId
+let searchCandidate
+try {
+  searchCandidate = await Candidate.findById(req.userId).select("-password")
+} catch (error) {
+  throw new ApiError(500, `DbError : ${error.message || "Unable to find Candidate"}`)
+}
+if(!searchCandidate){
+  throw new ApiError(500, "DbError : Candidate not finded")
+}
+
+// check file received 
+if(!req.file){
+
+}
+const fileLocalPath = req.file?.path
+
+// upload file on cloudinary and received url responce
+let cloudibaryResponce
+try {
+  cloudibaryResponce = await uploadToCloudinary(fileLocalPath)
+} catch (error) {
+  
+}
+if(!cloudibaryResponce){
+
+}
+// update candidate
+let updateCandidate
+try {
+  updateCandidate = await Candidate.findByIdAndUpdate(searchCandidate._id, {
+    $push : {
+      resumeArray : cloudibaryResponce.url
+    }
+  },{new:true}).select("-password -__v")
+} catch (error) {
+  
+}
+if(!updateCandidate){
+
+}
+
+// return responce with updated array
+return res
+.status(200)
+.json(new ApiResponce(200, updateCandidate, "successMessage : new resume add successfully "))
 
 })
 
 export const removeAResume = AsyncHandler(async (req, res) => {
+/**
+ * check candidate is login
+ * check resume url received from params
+ * find resume id availavel in resume array
+ * filter resume array without given id and save
+ * return responce
+ */
+// check Candidate login
+if(!req.userId){
+  throw new ApiError(400, "Candidate not login, please login first")
+}
+if(req.userType !== "Candidate"){
+  throw new ApiError(409, "LoginError : Unaurtorize Access")
+}
+if(req.params?.userId !== req.userId){
+  throw new ApiError(409, "ParamsError : Unaurtorize Access")
+}
+// search Candidate data by userId
+let searchCandidate
+try {
+  searchCandidate = await Candidate.findById(req.userId).select("-password")
+} catch (error) {
+  throw new ApiError(500, `DbError : ${error.message || "Unable to find Candidate"}`)
+}
+if(!searchCandidate){
+  throw new ApiError(500, "DbError : Candidate not finded")
+}
 
 })
 
 export const getAllResume = AsyncHandler(async (req, res) => {
+  /**
+   * check candidate is login
+   * find all resume array
+   * return responce
+   */
+  // check Candidate login
+  if(!req.userId){
+    throw new ApiError(400, "Candidate not login, please login first")
+  }
+  if(req.userType !== "Candidate"){
+    throw new ApiError(409, "LoginError : Unaurtorize Access")
+  }
+  if(req.params?.userId !== req.userId){
+    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+  }
+// search Candidate data by userId
+  let searchCandidate
+  try {
+    searchCandidate = await Candidate.findById(req.userId).select("-password")
+  } catch (error) {
+    throw new ApiError(500, `DbError : ${error.message || "Unable to find Candidate"}`)
+  }
+  if(!searchCandidate){
+    throw new ApiError(500, "DbError : Candidate not finded")
+  }
   
 })
 
@@ -690,6 +1058,27 @@ export const getAllJobsByKeySkills = AsyncHandler(async (req, res) => {
    * filter jobs by keyskills 
    * return result and responce
    */
+  // check Candidate login
+  if(!req.userId){
+    throw new ApiError(400, "Candidate not login, please login first")
+  }
+  if(req.userType !== "Candidate"){
+    throw new ApiError(409, "LoginError : Unaurtorize Access")
+  }
+  if(req.params?.userId !== req.userId){
+    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+  }
+// search Candidate data by userId
+  let searchCandidate
+  try {
+    searchCandidate = await Candidate.findById(req.userId).select("-password")
+  } catch (error) {
+    throw new ApiError(500, `DbError : ${error.message || "Unable to find Candidate"}`)
+  }
+  if(!searchCandidate){
+    throw new ApiError(500, "DbError : Candidate not finded")
+  }
+  
 })
 export const getAllJobsbyFilter = AsyncHandler(async (req, res) => {
   /**
@@ -697,6 +1086,27 @@ export const getAllJobsbyFilter = AsyncHandler(async (req, res) => {
    * check defining Filter from params
    * filter jobs and return result with responce
    */
+  // check Candidate login
+  if(!req.userId){
+    throw new ApiError(400, "Candidate not login, please login first")
+  }
+  if(req.userType !== "Candidate"){
+    throw new ApiError(409, "LoginError : Unaurtorize Access")
+  }
+  if(req.params?.userId !== req.userId){
+    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+  }
+// search Candidate data by userId
+  let searchCandidate
+  try {
+    searchCandidate = await Candidate.findById(req.userId).select("-password")
+  } catch (error) {
+    throw new ApiError(500, `DbError : ${error.message || "Unable to find Candidate"}`)
+  }
+  if(!searchCandidate){
+    throw new ApiError(500, "DbError : Candidate not finded")
+  }
+  
 })
 
 export const getAllApplications = AsyncHandler(async (req, res) => {
@@ -705,6 +1115,27 @@ export const getAllApplications = AsyncHandler(async (req, res) => {
    * reteive all application by candidate applications array
    * return result and responce
    */
+  // check Candidate login
+  if(!req.userId){
+    throw new ApiError(400, "Candidate not login, please login first")
+  }
+  if(req.userType !== "Candidate"){
+    throw new ApiError(409, "LoginError : Unaurtorize Access")
+  }
+  if(req.params?.userId !== req.userId){
+    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+  }
+// search Candidate data by userId
+  let searchCandidate
+  try {
+    searchCandidate = await Candidate.findById(req.userId).select("-password")
+  } catch (error) {
+    throw new ApiError(500, `DbError : ${error.message || "Unable to find Candidate"}`)
+  }
+  if(!searchCandidate){
+    throw new ApiError(500, "DbError : Candidate not finded")
+  }
+  
 })
 
 export const getAllSortedApplications = AsyncHandler(async (req, res) => {
@@ -713,6 +1144,27 @@ export const getAllSortedApplications = AsyncHandler(async (req, res) => {
    * reteive all sorted application by candidate sorted applications array
    * return result and responce 
    */
+  // check Candidate login
+  if(!req.userId){
+    throw new ApiError(400, "Candidate not login, please login first")
+  }
+  if(req.userType !== "Candidate"){
+    throw new ApiError(409, "LoginError : Unaurtorize Access")
+  }
+  if(req.params?.userId !== req.userId){
+    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+  }
+// search Candidate data by userId
+  let searchCandidate
+  try {
+    searchCandidate = await Candidate.findById(req.userId).select("-password")
+  } catch (error) {
+    throw new ApiError(500, `DbError : ${error.message || "Unable to find Candidate"}`)
+  }
+  if(!searchCandidate){
+    throw new ApiError(500, "DbError : Candidate not finded")
+  }
+  
 })
 
 export const getApplicationDetails = AsyncHandler(async (req, res) => {
@@ -722,6 +1174,27 @@ export const getApplicationDetails = AsyncHandler(async (req, res) => {
    * retrive application details by application id
    * return result and responce
    */
+  // check Candidate login
+  if(!req.userId){
+    throw new ApiError(400, "Candidate not login, please login first")
+  }
+  if(req.userType !== "Candidate"){
+    throw new ApiError(409, "LoginError : Unaurtorize Access")
+  }
+  if(req.params?.userId !== req.userId){
+    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+  }
+// search Candidate data by userId
+  let searchCandidate
+  try {
+    searchCandidate = await Candidate.findById(req.userId).select("-password")
+  } catch (error) {
+    throw new ApiError(500, `DbError : ${error.message || "Unable to find Candidate"}`)
+  }
+  if(!searchCandidate){
+    throw new ApiError(500, "DbError : Candidate not finded")
+  }
+  
 })
 
 export const checkApplicationStatus = AsyncHandler(async (req, res) => {
@@ -731,8 +1204,28 @@ export const checkApplicationStatus = AsyncHandler(async (req, res) => {
    * retrive application status by application id
    * return result and responce
    */
+  // check Candidate login
+  if(!req.userId){
+    throw new ApiError(400, "Candidate not login, please login first")
+  }
+  if(req.userType !== "Candidate"){
+    throw new ApiError(409, "LoginError : Unaurtorize Access")
+  }
+  if(req.params?.userId !== req.userId){
+    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+  }
+// search Candidate data by userId
+  let searchCandidate
+  try {
+    searchCandidate = await Candidate.findById(req.userId).select("-password")
+  } catch (error) {
+    throw new ApiError(500, `DbError : ${error.message || "Unable to find Candidate"}`)
+  }
+  if(!searchCandidate){
+    throw new ApiError(500, "DbError : Candidate not finded")
+  }
+  
 })
-
 
 
 export const getEmployeeDetails = AsyncHandler(async (req, res) => {
@@ -769,7 +1262,7 @@ export const getEmployeeDetails = AsyncHandler(async (req, res) => {
   // search Employee Data
   let searchEmployee
   try {
-    searchEmployee = await Candidate.findById(req.params?.employeeId).select("_id fullName isActive avatar areaOfIntrest resumeArray")
+    searchEmployee = await Employee.findById(req.params?.employeeId).select("_id fullName isActive avatar companyDetails jobsArray previousJobsArray")
   } catch (error) {
     throw new ApiError(500, `DbError : ${error.message || "Unable to find Candidate"}`)
   }
@@ -778,9 +1271,9 @@ export const getEmployeeDetails = AsyncHandler(async (req, res) => {
   }
   // check Employee Candidate connection 
   let connectionStatus
-  if(searchCandidate.connectionsRequestWithCandidates.find(connection => connection.EmployeeId?.toString() === req.params.employeeId)){
+  if(searchCandidate.connectionsRequestWithEmployees.find(connection => connection.EmployeeId?.toString() === req.params.employeeId)){
     connectionStatus = "Panding"
-  } else if(searchCandidate.connectionsWithCandidates.find(connection => connection.EmployeeId?.toString() === req.params.employeeId)){
+  } else if(searchCandidate.connectionsWithEmployees.find(connection => connection.EmployeeId?.toString() === req.params.employeeId)){
     connectionStatus = "Connected"
   } else{
     connectionStatus = "Nott Connected"
@@ -802,7 +1295,7 @@ export const getEmployeeDetails = AsyncHandler(async (req, res) => {
   return res 
   .status(200)
   .json(new ApiResponce(200, {
-    candidateDatails : searchCandidate,
+    employeeDatails : searchEmployee,
     connectionStatus, followersStatus, followingStatus
   }, "successMessage : candidate datails returned"))
 

@@ -1,4 +1,4 @@
-import { Schema, connection, model } from "mongoose"
+import { Schema, model } from "mongoose"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
@@ -52,7 +52,7 @@ const EmployeeSchema = new Schema({
 		},
 		status: {
 			type: Boolean,
-			default: panding
+			default: "pending"
 		},
 		joinDate: {
 			type: Date
@@ -65,7 +65,7 @@ const EmployeeSchema = new Schema({
 		},
 		status: {
 			type: Boolean,
-			default: panding
+			default: "pending"
 		},
 		joinDate: {
 			type: Date
@@ -78,7 +78,7 @@ const EmployeeSchema = new Schema({
 		},
 		status: {
 			type: Boolean,
-			default: panding
+			default: "pending"
 		}
 	}],
 	connectionsWithCandidates: [{
@@ -88,7 +88,7 @@ const EmployeeSchema = new Schema({
 		},
 		status: {
 			type: Boolean,
-			default: panding
+			default: "pending"
 		}
 	}],
 	followingByEmployees: [{
@@ -133,9 +133,16 @@ const EmployeeSchema = new Schema({
 		}
 	}],
 	jobsArray: [{
+		jobId : {
 		type: Schema.Types.ObjectId,
 		ref: "Job"
-	}],
+		}, 
+		addDate : {
+			type:Date,
+			default:Date.now
+		}
+}
+],
 	previousJobsArray: [{
 		type: Schema.Types.ObjectId,
 		ref: "Job"
@@ -157,10 +164,10 @@ EmployeeSchema.methods.checkPasswordCorrect = async function (password) {
 }
 
 // generate AccessRefreshTokens
-EmployeeSchema.methods.generateAccessToken() = async function () {
+EmployeeSchema.methods.GenerateAccessToken = async function () {
 	return await jwt.sign({
 		_id: this._id,
-    userType : "Candidate"
+    userType : "Employee"
 	},
 		process.env.ACCESS_TOKEN_SECRET_KEY,
 		{
@@ -168,10 +175,10 @@ EmployeeSchema.methods.generateAccessToken() = async function () {
 		}
 	)
 }
-EmployeeSchema.methods.generateRefreshToken() = async function () {
+EmployeeSchema.methods.GenerateRefreshToken = async function () {
 	return await jwt.sign({
 		_id: this._id,
-    userType : "Candidate"
+    userType : "Employee"
 	},
 		process.env.REFRESH_TOKEN_SECRET_KEY,
 		{

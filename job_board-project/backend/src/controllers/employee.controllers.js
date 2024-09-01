@@ -53,10 +53,10 @@ export const registerEmployee = AsyncHandler(async (req, res) => {
     position,
     joinDate,
   } = req.body;
-
+  
   // validate data 
   if (
-    ![
+    [
       emailId,
       fullName,
       password,
@@ -64,7 +64,7 @@ export const registerEmployee = AsyncHandler(async (req, res) => {
       department,
       position,
       joinDate,
-    ].some((field) => field)
+    ].some((field) => field === undefined)
   ) {
     throw new ApiError(404, "DataError : All field is required")
   }
@@ -77,7 +77,7 @@ export const registerEmployee = AsyncHandler(async (req, res) => {
       department,
       position,
       joinDate,
-    ].some((field) => field.toString().trim() === "")
+    ].some((field) => field?.toString().trim() === "")
   ) {
     throw new ApiError(400, "DataError : No any field is empty")
   }
@@ -94,7 +94,7 @@ export const registerEmployee = AsyncHandler(async (req, res) => {
     name: companyName,
     department,
     position,
-    joinDate,
+    joinDate, // mm/dd/yyyy formet
   };
   // create and save new Employee
   let newCreatedEmployee;
@@ -160,7 +160,7 @@ export const loginEmployee = AsyncHandler(async (req, res) => {
   const { emailId, password } = req.body;
 
   // validate data  
-  if (![emailId, password].some((field) => field)) {
+  if ([emailId, password].some((field) => field === undefined)) {
     throw new ApiError(404, "dataError : All field is required")
   }
   if ([emailId, password].some((field) => field?.toString().trim() === "")) {
@@ -181,20 +181,21 @@ export const loginEmployee = AsyncHandler(async (req, res) => {
     throw new ApiError(400, "DataError : Employee Password is not valid")
   }
   // generate Tokens 
-  const { accessToken, refreshToken } = await GenrateAccessRefreshToken(
-    searchEmployee
-  );
+  const {accessToken, refreshToken} = await GenrateAccessRefreshToken(searchEmployee)
 
   // check tokens
+  if([accessToken, refreshToken].some(field => field  === undefined)){
+    throw new ApiError(500, "DbError : Token not available")
+  }
   if([accessToken, refreshToken].some(field => field.toString().trim() === "")){
-    throw new ApiError(400, "DBError : No any token generated")
+    throw new ApiError(500, "DBError : No any token generated")
   }
   // updated field in Employee database
   let updateSearchEmployee
   try {
     updateSearchEmployee = await Employee.findByIdAndUpdate(searchEmployee._id, {
       $set : {
-        lastLogin : Date.now
+        lastLogin : Date.now()
       }
     }, {new:true}).select("-password -__v")
   } catch (error) {
@@ -237,7 +238,7 @@ export const logoutEmployee = AsyncHandler(async (req, res) => {
     updateEmployee = await Employee.findByIdAndUpdate(req.userId,
       {
         $set : {
-          lastLogout : Date.now
+          lastLogout : Date.now()
         }
       }, {new:true}
     ).select("_id")
@@ -303,18 +304,9 @@ export const updateEmployeeFullName = AsyncHandler(async (req, res) => {
   if(!updateEmployee){
     throw new ApiError(500, "DbError : Employee not updated")
   }
-  // re generate accessToken
-  const accessToken = await updateEmployee.generateAccessToken()
-  if(!accessToken){
-    throw new ApiError(500, "DbError : AccessToken not generated")
-
-  }
-
-  // reset accessToken cookie and return responce with updated Employee data
+  // return responce with updated Employee data
   return res 
   .status(200)
-  .clearCookie("accessToken", accessTokenCookieOption)
-  .cookie("accessToken", accessToken ,accessTokenCookieOption)
   .json(new ApiResponce(200, updateEmployee, "successMessage : Employee updated successfully"))
 });
 
@@ -375,16 +367,9 @@ export const updateEmployeeCompanyDetails = AsyncHandler(async (req, res) => {
   if(!updateEmployee){
     throw new ApiError(500, "Employee not updated")
   }
-  // regenrate accessToken
-  const accessToken = await updateEmployee.generateAccessToken()
-  if(!accessToken){
-    throw new ApiError(500, "AccessToken not generated")
-  }
-  // reset access Token and return responce with updated Employee
+  // return responce with updated Employee
   return res 
   .status(200)
-  .clearCookie("accessToken", accessTokenCookieOption)
-  .cookie("accessToken", accessToken ,accessTokenCookieOption)
   .json(new ApiResponce(200, updateEmployee, "successMessage : Employee company datails updated successfully"))
 });
 
@@ -421,7 +406,7 @@ export const changeEmployeePassword = AsyncHandler(async (req, res) => {
   // search Employee by userId
   let searchEmployee
   try {
-    searchEmployee = await Employee.findById(req.body).select("-__v")
+    searchEmployee = await Employee.findById(req.userId).select("-__v")
   } catch (error) {
     throw new ApiError(500, `DbError : ${error.message || "Unable to search Employee"}`)
   }
@@ -532,7 +517,7 @@ if(req.params?.userId !== req.userId){
   .json(new ApiResponce(200, searchEmployee, "seccessMessage : Employee Data returned"))
 });
 
-export const setAvatar = AsyncHandler(async (req, res) => {
+export const setEmployeeAvatar = AsyncHandler(async (req, res) => {
   /**
    * check Employee already login : check accessToken in cookies
    * reteive file localPath and upload in cloudinary
@@ -610,7 +595,7 @@ if(req.params?.userId !== req.userId){
   .json(200, updateEmployee, "successMessage : Employee Avatar set successfully")
 });
 
-export const removeAvatar = AsyncHandler(async (req, res) => {
+export const removeEmployeeAvatar = AsyncHandler(async (req, res) => {
   /**
    * check Employee already login : check accessToken in cookies
    * check Employee Avatar is default
@@ -665,6 +650,13 @@ export const removeAvatar = AsyncHandler(async (req, res) => {
   .status(200)
   .json(200, updateEmployee, "successMessage : Employee Avatar removed")
 });
+
+export const getAllJobs = AsyncHandler(async (req, res) => {
+
+})
+export const getAllPreviousJobs = AsyncHandler(async (req, res) => {
+  
+})
 
 export const getCandidateDetails = AsyncHandler(async (req, res) => {
   /**

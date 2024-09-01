@@ -9,7 +9,7 @@ const JobSchema = new Schema({
         type:Schema.Types.ObjectId,
         ref : "Employee",
         required : true,
-        unique:true      
+              
     },
     description : {
         type:String,
@@ -19,11 +19,11 @@ const JobSchema = new Schema({
         type:String,
         required : true      
     },
-    status : {
+    startStatus : {
         type:String,
         required : true      
     },
-    fiels : {
+    field : {
         type:String,
         required : true      
     },
@@ -31,27 +31,30 @@ const JobSchema = new Schema({
         type:String,
         required : true      
     }],
-    numberOdOpening : {
+    numberOfOpening : {
         type:Number,
         default : 1
     },
     maxApplication : {
-        type:number,
+        type:Number,
         default : 1000
     },
     applicationStartDate : {
         type : Date,
         required : true
     },
-    applicationEndtDate : {
+    applicationEndDate : {
         type : Date,
         required : true
     },
     application_array : [{
         type : Schema.Types.ObjectId,
         ref : "Application"
-    }]
-
+    }],
+    status : {
+        type : String,
+        default : "Active"
+    }
 })
 
 // models
