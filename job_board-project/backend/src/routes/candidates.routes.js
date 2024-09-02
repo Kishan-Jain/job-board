@@ -5,11 +5,9 @@ import {
   addAreaOfIntrest,
   addNewSkills,
   changeCandidatePassword,
-  checkApplicationStatus,
   deleteCandidate,
   getAllApplications,
-  getAllJobsbyFilter,
-  getAllJobsByKeySkills,
+  getAllJobsByCandidateField,
   getAllResume,
   getAllSortedApplications,
   getApplicationDetails,
@@ -78,11 +76,8 @@ candidateRouter
   .patch(isLogin, removeAResume);
 candidateRouter.route("/:userId/getAllResume").get(isLogin, getAllResume);
 candidateRouter
-  .route("/:userId/jobs/getAllJobsbyKetSkills")
-  .get(isLogin, getAllJobsByKeySkills);
-candidateRouter
-  .route("/:userId/jobs/getAllJobsbyFilter/:Filter")
-  .get(isLogin, getAllJobsbyFilter);
+  .route("/:userId/jobs/getAllJobsbyField")
+  .get(isLogin, getAllJobsByCandidateField);
 candidateRouter
   .route("/:userId/jobs/applications/getAllApplications")
   .get(isLogin, getAllApplications);
@@ -92,9 +87,6 @@ candidateRouter
 candidateRouter
   .route("/:userId/jobs/applications/getApplicationDetails/:ApplicationId")
   .get(isLogin, getApplicationDetails);
-candidateRouter
-  .route("/:userId/jobs/applications/checkApplicationStatus/:ApplicationId")
-  .get(isLogin, checkApplicationStatus);
 candidateRouter
   .route("/:userId/getEmployeeDetails/:employeeId")
   .get(isLogin, getEmployeeDetails);

@@ -652,10 +652,63 @@ export const removeEmployeeAvatar = AsyncHandler(async (req, res) => {
 });
 
 export const getAllJobs = AsyncHandler(async (req, res) => {
-
+/**
+ * check employee login
+ * retuevied all jobs info
+ * return responce 
+ */
+  // check Employee login
+  if(!req.userId){
+    throw new ApiError(400, "Employee not login, please login first")
+  }
+  if(req.userType !== "Employee"){
+    throw new ApiError(409, "LoginError : Unaurtorize Access")
+  }
+  if(req.params?.userId !== req.userId){
+    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+  }
+  let allJobInfo
+  try {
+    allJobInfo = await Employee.findById(req.params?.userId).select("jobsArray")
+  } catch (error) {
+    throw new ApiError(500, `DbError : ${error.message || "Unable to find job array"}`)
+  }
+  if(!allJobInfo){
+    throw new ApiError(500, "Job array not finded")
+  }
+  return res
+  .status(200)
+  .json(new ApiResponce(200, allJobInfo, "successMessage : all jobs received"))
 })
 export const getAllPreviousJobs = AsyncHandler(async (req, res) => {
-  
+
+/**
+ * check employee login
+ * retuevied all jobs info
+ * return responce 
+ */
+  // check Employee login
+  if(!req.userId){
+    throw new ApiError(400, "Employee not login, please login first")
+  }
+  if(req.userType !== "Employee"){
+    throw new ApiError(409, "LoginError : Unaurtorize Access")
+  }
+  if(req.params?.userId !== req.userId){
+    throw new ApiError(409, "ParamsError : Unaurtorize Access")
+  }
+  let allPreviousJobInfo
+  try {
+    allPreviousJobInfo = await Employee.findById(req.params?.userId).select("previousJobsArray")
+  } catch (error) {
+    throw new ApiError(500, `DbError : ${error.message || "Unable to find job array"}`)
+  }
+  if(!allPreviousJobInfo){
+    throw new ApiError(500, "Job array not finded")
+  }
+  return res
+  .status(200)
+  .json(new ApiResponce(200, allPreviousJobInfo, "successMessage : all jobs received"))
 })
 
 export const getCandidateDetails = AsyncHandler(async (req, res) => {
@@ -699,34 +752,9 @@ export const getCandidateDetails = AsyncHandler(async (req, res) => {
   if(!searchCandidate){
     throw new ApiError(500, "DbError : Candidate Data not find")
   }
-  // check candidate Employee connection 
-  let connectionStatus
-  if(searchEmployee.connectionsRequestWithCandidates.find(connection => connection.CandidateId?.toString() === req.params.candidateId)){
-    connectionStatus = "Panding"
-  } else if(searchEmployee.connectionsWithCandidates.find(connection => connection.CandidateId?.toString() === req.params.candidateId)){
-    connectionStatus = "Connected"
-  } else{
-    connectionStatus = "Not Connected"
-  }
-  let followingStatus = "Not following"
-  // if(searchEmployee.followingByCandidates.find(connection => connection.CandidateId?.toString() === req.params.candidateId)){
-  //   followingStatus = "Following"
-  // } else{
-  //   followingStatus = "Nott Following"
-  // }
-  let followersStatus = "Not follow"
-  // if(searchEmployee.connectionsWithCandidates.find(connection => connection.CandidateId?.toString() === req.params.candidateId)){
-  //   followers = "Connected"
-  // } else{
-  //   followers = "Not Connected"
-  // }
-
   // return responce with all necessary info 
   return res 
   .status(200)
-  .json(new ApiResponce(200, {
-    candidateDatails : searchCandidate,
-    connectionStatus, followersStatus, followingStatus
-  }, "successMessage : candidate datails returned"))
+  .json(new ApiResponce(200, searchCandidate, "successMessage : candidate datails returned"))
 
 });

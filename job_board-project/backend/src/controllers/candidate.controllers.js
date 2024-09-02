@@ -30,6 +30,8 @@ import ApiError from "../utils/ApiError.js"
 import ApiResponce from "../utils/ApiResponce.js"
 import Candidate from "../models/candidates.models.js"
 import Employee from "../models/empoleeyes.models.js"
+import Job from "../models/jobs.models.js"
+import Application from "../models/applications.models.js"
 import {accessTokenCookieOption, refreshTokenCookieOption} from "../constants.js"
 import {uploadToCloudinary, removeToCloudinary} from "../utils/CloudinaryServices.js"
 import {GenrateAccessRefreshToken} from "../utils/GenrateAccessRefreshToken.js"
@@ -644,7 +646,6 @@ return res
 .json(new ApiResponce(200, updateCandidate, "successMessage : skill remove successfully"))
 })
 
-
 export const changeCandidatePassword = AsyncHandler(async (req, res) => {
   /**
    * check Candidate already login : check accessToken in cookies
@@ -1051,7 +1052,7 @@ export const getAllResume = AsyncHandler(async (req, res) => {
   
 })
 
-export const getAllJobsByKeySkills = AsyncHandler(async (req, res) => {
+export const getAllJobsByCandidateField = AsyncHandler(async (req, res) => {
   /**
    * check candidate login : check accessToken in cookies
    * reteive candidate keyskills 
@@ -1078,35 +1079,19 @@ export const getAllJobsByKeySkills = AsyncHandler(async (req, res) => {
   if(!searchCandidate){
     throw new ApiError(500, "DbError : Candidate not finded")
   }
-  
-})
-export const getAllJobsbyFilter = AsyncHandler(async (req, res) => {
-  /**
-   * check candidate login : check accessToken in cookies 
-   * check defining Filter from params
-   * filter jobs and return result with responce
-   */
-  // check Candidate login
-  if(!req.userId){
-    throw new ApiError(400, "Candidate not login, please login first")
-  }
-  if(req.userType !== "Candidate"){
-    throw new ApiError(409, "LoginError : Unauthorize Access")
-  }
-  if(req.params?.userId !== req.userId){
-    throw new ApiError(409, "ParamsError : Unauthorize Access")
-  }
-// search Candidate data by userId
-  let searchCandidate
+  // reteive all jobs
+  let reteiveAllJobs
   try {
-    searchCandidate = await Candidate.findById(req.userId).select("-password")
+    reteiveAllJobs = await Job.find({field : searchCandidate.field})
   } catch (error) {
-    throw new ApiError(500, `DbError : ${error.message || "Unable to find Candidate"}`)
+    throw new ApiError(500, `DbError : ${error.message || "Unable to find Jobs"}`)
   }
-  if(!searchCandidate){
-    throw new ApiError(500, "DbError : Candidate not finded")
+  if(!reteiveAllJobs){
+    throw new ApiError(500, "DbError : No any jobs find")
   }
-  
+  return res 
+  .status(200)
+  .json(new ApiResponce(200, reteiveAllJobs, "successMessage : All jobs reteived"))
 })
 
 export const getAllApplications = AsyncHandler(async (req, res) => {
@@ -1125,17 +1110,19 @@ export const getAllApplications = AsyncHandler(async (req, res) => {
   if(req.params?.userId !== req.userId){
     throw new ApiError(409, "ParamsError : Unauthorize Access")
   }
-// search Candidate data by userId
-  let searchCandidate
+// search Candidate application by userId
+  let searchCandidateAllApplication
   try {
-    searchCandidate = await Candidate.findById(req.userId).select("-password")
+    searchCandidateAllApplication = await Candidate.findById(req.userId).select("application")
   } catch (error) {
-    throw new ApiError(500, `DbError : ${error.message || "Unable to find Candidate"}`)
+    throw new ApiError(500, `DbError : ${error.message || "Unable to find Candidate application"}`)
   }
-  if(!searchCandidate){
-    throw new ApiError(500, "DbError : Candidate not finded")
+  if(!searchCandidateAllApplication){
+    throw new ApiError(500, "DbError : Candidate application not finded")
   }
-  
+  return res
+  .status(200)
+  .json(new ApiError(200, searchCandidateAllApplication, "successMessage : All application reteive"))
 })
 
 export const getAllSortedApplications = AsyncHandler(async (req, res) => {
@@ -1154,16 +1141,19 @@ export const getAllSortedApplications = AsyncHandler(async (req, res) => {
   if(req.params?.userId !== req.userId){
     throw new ApiError(409, "ParamsError : Unauthorize Access")
   }
-// search Candidate data by userId
-  let searchCandidate
-  try {
-    searchCandidate = await Candidate.findById(req.userId).select("-password")
-  } catch (error) {
-    throw new ApiError(500, `DbError : ${error.message || "Unable to find Candidate"}`)
-  }
-  if(!searchCandidate){
-    throw new ApiError(500, "DbError : Candidate not finded")
-  }
+// search Candidate all sorted application by userId
+let searchCandidateAllSortedApplication
+try {
+  searchCandidateAllSortedApplication = await Candidate.findById(req.userId).select("sortedApplication")
+} catch (error) {
+  throw new ApiError(500, `DbError : ${error.message || "Unable to find Candidate application"}`)
+}
+if(!searchCandidateAllSortedApplication){
+  throw new ApiError(500, "DbError : Candidate application not finded")
+}
+return res
+.status(200)
+.json(new ApiError(200, searchCandidateAllSortedApplication, "successMessage : All sorted application reteive"))
   
 })
 
@@ -1184,35 +1174,8 @@ export const getApplicationDetails = AsyncHandler(async (req, res) => {
   if(req.params?.userId !== req.userId){
     throw new ApiError(409, "ParamsError : Unauthorize Access")
   }
-// search Candidate data by userId
-  let searchCandidate
-  try {
-    searchCandidate = await Candidate.findById(req.userId).select("-password")
-  } catch (error) {
-    throw new ApiError(500, `DbError : ${error.message || "Unable to find Candidate"}`)
-  }
-  if(!searchCandidate){
-    throw new ApiError(500, "DbError : Candidate not finded")
-  }
-  
-})
-
-export const checkApplicationStatus = AsyncHandler(async (req, res) => {
-  /**
-   * check candidate login : check accessToken in cookies
-   * check application Id from params
-   * retrive application status by application id
-   * return result and responce
-   */
-  // check Candidate login
-  if(!req.userId){
-    throw new ApiError(400, "Candidate not login, please login first")
-  }
-  if(req.userType !== "Candidate"){
-    throw new ApiError(409, "LoginError : Unauthorize Access")
-  }
-  if(req.params?.userId !== req.userId){
-    throw new ApiError(409, "ParamsError : Unauthorize Access")
+  if(!req.params?.ApplicationId){
+    throw new ApiError(404, "DataError : Application Id not find")
   }
 // search Candidate data by userId
   let searchCandidate
@@ -1224,9 +1187,29 @@ export const checkApplicationStatus = AsyncHandler(async (req, res) => {
   if(!searchCandidate){
     throw new ApiError(500, "DbError : Candidate not finded")
   }
-  
-})
+  if(!(
+    searchCandidate.application.find(application => application.applicationId.toString() === req.params?.applicationId) || 
+    searchCandidate.sortedApplication.find(application => application.applicationId.toString() === req.params?.applicationId) ||
+    searchCandidate.rejectedApplication.find(application => application.applicationId.toString() === req.params?.applicationId) 
+)){
+  throw new ApiError(400, "DataError : Application id Incorrect")
+  }
+  // reteived application by application id
+  let reteiveApplication
+  try {
+    reteiveApplication = await Application.findById(req.params?.ApplicationId)
+  } catch (error) {
+    throw new ApiError(500, `DbError : ${error.message || "unable to find application"}`)
+  }
+  if(!reteiveApplication){
+    throw new ApiError(500, "DbError : Application Details not find")
+  }
 
+  return res
+  .status(200)
+  .json(new ApiResponce(200,reteiveApplication, "siccessMessage : Application all data reteived"))
+
+})
 
 export const getEmployeeDetails = AsyncHandler(async (req, res) => {
   /**
@@ -1269,37 +1252,9 @@ export const getEmployeeDetails = AsyncHandler(async (req, res) => {
   if(!searchEmployee){
     throw new ApiError(500, "DbError : Candidate Data not find")
   }
-  // check Employee Candidate connection 
-  let connectionStatus
-  if(searchCandidate.connectionsRequestWithEmployees.find(connection => connection.EmployeeId?.toString() === req.params.employeeId)){
-    connectionStatus = "Panding"
-  } else if(searchCandidate.connectionsWithEmployees.find(connection => connection.EmployeeId?.toString() === req.params.employeeId)){
-    connectionStatus = "Connected"
-  } else{
-    connectionStatus = "Nott Connected"
-  }
-  let followingStatus = "Nott following"
-  // if(searchCandidate.followingByCandidates.find(connection => connection.EmployeeId?.toString() === req.params.employeeId)){
-  //   followingStatus = "Following"
-  // } else{
-  //   followingStatus = "Nott Following"
-  // }
-  let followersStatus = "Nott follow"
-  // if(searchCandidate.connectionsWithCandidates.find(connection => connection.EmployeeId?.toString() === req.params.employeeId)){
-  //   followers = "Connected"
-  // } else{
-  //   followers = "Nott Connected"
-  // }
-
   // return responce with all necessary info 
   return res 
   .status(200)
-  .json(new ApiResponce(200, {
-    employeeDatails : searchEmployee,
-    connectionStatus, followersStatus, followingStatus
-  }, "successMessage : candidate datails returned"))
+  .json(new ApiResponce(200, searchEmployee, "successMessage : candidate datails returned"))
 
 });
-
-
-

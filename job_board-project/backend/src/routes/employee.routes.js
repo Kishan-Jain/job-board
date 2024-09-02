@@ -48,9 +48,12 @@ employeeRouter
 employeeRouter
   .route("/:userId/getCandidateDetails/:candidateId")
   .get(isLogin, getCandidateDetails);
-employeeRouter.route("/:userId/getAllJobs").get(isLogin, getAllJobs);
+employeeRouter.route("/getAllJobs/:userId").get(isLogin, getAllJobs);
 employeeRouter
-  .route("/:userId/getAllPreviousJobs")
+  .route("/getAllPreviousJobs/:userId")
   .get(isLogin, getAllPreviousJobs);
+
+
+
 
 export default employeeRouter;

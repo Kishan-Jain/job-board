@@ -45,104 +45,16 @@ const EmployeeSchema = new Schema({
 	avatar: {
 		type: String,
 	},
-	connectionsRequestWithEmployees: [{
-		EmployeeId: {
-			type: Schema.Types.ObjectId,
-			ref: "Employee",
-		},
-		status: {
-			type: Boolean,
-			default: "pending"
-		},
-		joinDate: {
-			type: Date
-		}
-	}],
-	connectionsRequestWithCandidates: [{
-		CandidateId: {
-			type: Schema.Types.ObjectId,
-			ref: "Candidate",
-		},
-		status: {
-			type: Boolean,
-			default: "pending"
-		},
-		joinDate: {
-			type: Date
-		}
-	}],
-	connectionsWithEmployees: [{
-		EmployeeId: {
-			type: Schema.Types.ObjectId,
-			ref: "Employee",
-		},
-		status: {
-			type: Boolean,
-			default: "pending"
-		}
-	}],
-	connectionsWithCandidates: [{
-		CandidateId: {
-			type: Schema.Types.ObjectId,
-			ref: "Candidate",
-		},
-		status: {
-			type: Boolean,
-			default: "pending"
-		}
-	}],
-	followingByEmployees: [{
-		type: Schema.Types.ObjectId,
-		ref: "Employee"
-	}],
-	followingByCandidates: [{
-		type: Schema.Types.ObjectId,
-		ref: "Candidate"
-	}],
-	followrdEmployees: [{
-		type: Schema.Types.ObjectId,
-		ref: "Employee"
-	}],
-	followrdCandidates: [{
-		type: Schema.Types.ObjectId,
-		ref: "Candidate"
-	}],
-
-	chatBox: [{
-		connectionId: {
-			type: String
-		},
-		chat: {
-			receivedMessage: [{
-				message: String,
-				time: Date
-			}],
-			receivedMediaFile: [{
-				fileUrl: String,
-				time: Date
-			}],
-			sendMessage: [{
-				message: String,
-				time: Date,
-				flag: Boolean
-			}],
-			sendMediaFile: [{
-				fileUrl: String,
-				time: Date
-			}]
-		}
-	}],
 	jobsArray: [{
+		jobTitle : String,
 		jobId : {
 		type: Schema.Types.ObjectId,
 		ref: "Job"
 		}, 
-		addDate : {
-			type:Date,
-			default:Date.now
-		}
+		addDate : Date
 	}],
 	previousJobsArray: [{
+		jobTitle : String,
 		jobId : {
 			type: Schema.Types.ObjectId,
 			ref: "Job"
