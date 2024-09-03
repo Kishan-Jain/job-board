@@ -14,6 +14,7 @@ import Job from "../models/jobs.models.js";
 import Employee from "../models/empoleeyes.models.js";
 import Candidate from "../models/candidates.models.js";
 import Application from "../models/applications.models.js";
+import sendEmail from "../utils/manageMail.js";
 
 export const publishNewJobVacancy = AsyncHandler(async (req, res) => {
   /**
@@ -145,6 +146,17 @@ export const publishNewJobVacancy = AsyncHandler(async (req, res) => {
   if (!addJobIdInEmployee) {
     throw new ApiError(500, "DbError : Employee not updated");
   }
+
+  // send Email
+  sendEmail(emailId, "Job Publish successfully", `Job Published successfull \n 
+    \njobtitle : ${title},
+    \nDesription : ${description},
+    \ntype : ${type},
+    \nfield : ${field},
+    \nkeySkills : ${keySkills},
+    \napplicationStartDate : ${applicationStartDate},
+    \napplicationEndDate : ${applicationEndDate}
+    `)
 
   return res
     .status(200)
@@ -291,7 +303,15 @@ export const updateVacancyDetails = AsyncHandler(async (req, res) => {
     throw new ApiError(404, "no any data received from params");
   }
   // const {description, keySkills, numberOfOpening, maxApplications, applicationEndDate} = req.body
-
+  let searchEmployee
+  try {
+    searchEmployee = await Employee.findById(req.userId).select("emailId")
+  } catch (error) {
+    throw new ApiError(500, `DbError : ${error.message || "Unable to find Employee"}`)
+  }
+  if(!searchEmployee){
+    throw new ApiError(500, "Employee not find")
+  }
   let updateJobDetails;
   try {
     updateJobDetails = await Job.findByIdAndUpdate(
@@ -310,6 +330,8 @@ export const updateVacancyDetails = AsyncHandler(async (req, res) => {
   if (!updateJobDetails) {
     throw new ApiError(500, "DbError : Job details not updated");
   }
+  // send Email
+  sendEmail(searchEmployee.emailId, "Update job Details", `Your Job ${updateJobDetails.title} is updated ${new Date}`)
   return res
     .status(200)
     .json(
@@ -398,7 +420,7 @@ export const deactivateVacancy = AsyncHandler(async (req, res) => {
         $push: { previousJobsArray: vacancyId },
       },
       { new: true }
-    ).select("vacancysArray previousJobsArray");
+    ).select("emailId vacancysArray previousJobsArray");
   } catch (error) {
     throw new ApiError(
       500,
@@ -408,6 +430,8 @@ export const deactivateVacancy = AsyncHandler(async (req, res) => {
   if (!changeEmployeeJobArray) {
     throw new ApiError(500, "DbError : Employee Job Array not changed");
   }
+  // send Email
+  sendEmail(changeEmployeeJobArray.emailId, "Job Deactivate", `Job "title : ${ makeVacancyDeactive.title}" deactivate Now. \nDate : ${new Date}  `)
   return res
     .status(200)
     .json(
@@ -494,7 +518,7 @@ export const reactivateVacancy = AsyncHandler(async (req, res) => {
         $push: { vacancysArray: vacancyId },
       },
       { new: true }
-    ).select("vacancysArray previousJobsArray");
+    ).select("emailId vacancysArray previousJobsArray");
   } catch (error) {
     throw new ApiError(
       500,
@@ -504,6 +528,8 @@ export const reactivateVacancy = AsyncHandler(async (req, res) => {
   if (!changeEmployeeJobArray) {
     throw new ApiError(500, "DbError : Employee Job Array not changed");
   }
+  // send Email
+  sendEmail(changeEmployeeJobArray.emailId, "Job Deactivate", `Job "title : ${ makeVacancyActivate.title}" ReActivate Now. \nDate : ${new Date}  `)
   return res
     .status(200)
     .json(
@@ -636,6 +662,8 @@ export const applyJobVacancy = AsyncHandler(async (req, res) => {
   if(!updateCandidateApplicationArray){
     throw new ApiError(500, "DbError : Job array not updated")
   }
+  // send Email
+  sendEmail(findCandidateDetails.emailId, "Job Application Received", `Job "title : ${jobTitle}" \n application received `)
   return res
     .status(201)
     .json(
@@ -780,6 +808,17 @@ export const matchApplicationWithJobKeySkills = AsyncHandler(
     if (!updateApplication) {
       throw new ApiError(500, "DbError : Application not updated");
     }
+    let findCandidateDetails
+    try {
+      findCandidateDetails = await Candidate.findById(updateApplication.candidateId).select("emailId")
+    } catch (error) {
+      throw new ApiError(500, `DbError : ${error.message || "unable to find candidate"}`)
+    }
+    if(!findCandidateDetails){
+      throw new ApiError(404, "DbError : candidate not find")
+    }
+    // send Email
+    sendEmail(findCandidateDetails.emailId, "Job Application updated", `congratulation : ${findCandidateDetails.fullName} \n Job "title : ${jobTitle}" \n application varify your key skills `)
     return res
       .status(200)
       .json(
@@ -897,6 +936,8 @@ export const markToSortlistedJobApplication = AsyncHandler(async (req, res) => {
   if (!updateCandidate) {
     throw new ApiError(500, "DbError : Candidate not Updated");
   }
+  // send Email
+  sendEmail(updateCandidate.emailId, "Job Application updates", `Congratulation ${updateCandidate.fullName} \nJob "title : ${jobTitle}" \n application sortlisted, we contact you for next step very soon `)
 
   return res
     .status(200)
@@ -1004,6 +1045,7 @@ export const markToRejectedJobApplication = AsyncHandler(async (req, res) => {
     let newApplicationArray = findCandidateDetails.application.filter(field => field.applicationId?.toString() !== updateApplication._id?.toString())
     findCandidateDetails.application = newApplicationArray
     await findCandidateDetails.save({validateBeforeSave:false})
+    
     updateCandidate = await Candidate.findByIdAndUpdate(findCandidateDetails._id, {
       $push : {rejectedApplication : applicationId}
     }, {new:true}).select("-password");
@@ -1013,7 +1055,8 @@ export const markToRejectedJobApplication = AsyncHandler(async (req, res) => {
   if (!updateCandidate) {
     throw new ApiError(500, "DbError : Candidate not updated");
   }
-
+  // send Email
+  sendEmail(updateCandidate.emailId, "Job Application updates", `Unfortunretuly, ${updateCandidate.fullName} \nJob "title : ${jobTitle}" \n application rejected, we are regret for this.`)
   return res
     .status(200)
     .json(

@@ -35,6 +35,7 @@ import Application from "../models/applications.models.js"
 import {accessTokenCookieOption, refreshTokenCookieOption} from "../constants.js"
 import {uploadToCloudinary, removeToCloudinary} from "../utils/CloudinaryServices.js"
 import {GenrateAccessRefreshToken} from "../utils/GenrateAccessRefreshToken.js"
+import sendEmail from "../utils/manageMail.js"
 
 export const registerCandidate = AsyncHandler(async (req, res) => {
   /**
@@ -122,6 +123,8 @@ export const registerCandidate = AsyncHandler(async (req, res) => {
   if (!findNewCreatedCandidate) {
     throw new ApiError(500, `DbError : new created Candidate not found`)
   }
+  // send Email
+  sendEmail(findNewCreatedCandidate.emailId, "Cnadidate registed successFully", `Candidate registed successfull \n EmailId : ${emailId} \n Password : ${password}`)
   // return responce with new create Candidate
   return res
     .status(201)
@@ -201,7 +204,8 @@ export const loginCandidate = AsyncHandler(async (req, res) => {
   if(!updateSearchCandidate){
     throw new ApiError(500, "DBError : Candidate not updated")
   }
-
+  // send Email
+  sendEmail(updateSearchCandidate.emailId, "Candidate Login", `Candidate login successfully \nDate : ${new Date}`)
   // set cookies and return responce with new updated data
   return res 
   .status(200)
@@ -237,7 +241,7 @@ export const logoutCandidate = AsyncHandler(async (req, res) => {
           lastLogout : Date.now()
         }
       }, {new:true}
-    ).select("_id")
+    ).select("_id emailId")
   } catch (error) {
     throw new ApiError(500, `DbError : ${error.message || "Unable to update Candidate Data"}`)
   }
@@ -245,6 +249,8 @@ export const logoutCandidate = AsyncHandler(async (req, res) => {
   if(!updateCandidate){
     throw new ApiError(500, "DbError : Candidate data not update")
   }
+  // send Email
+  sendEmail(updateCandidate.emailId, "Candidate logout", `Candidate logout now, Date : ${new Date}`)
   // clear cookies and return responce 
   return res
   .status(200)
@@ -307,6 +313,8 @@ export const updateCandidateFullName = AsyncHandler(async (req, res) => {
   if(!updateCandidate){
     throw new ApiError(500, "DbError : Candidate not updated")
   }
+  // send Email
+  sendEmail(updateCandidate.emailId, "Candidate details updated", `Candidate Details Updated. \nDate : ${new Date}`)
   // return responce with updated Candidate data
   return res 
   .status(200)
@@ -366,6 +374,8 @@ export const updateCandidateField = AsyncHandler(async (req, res) => {
   if(!updateCandidate){
     throw new ApiError(500, "DbError : Candidate not updated")
   }
+  // send Email
+  sendEmail(updateCandidate.emailId, "Candidate details updated", `Candidate details updated successfully \n Date : ${new Date}`)
   // return responce with updated Candidate data
   return res 
   .status(200)
@@ -701,7 +711,8 @@ export const changeCandidatePassword = AsyncHandler(async (req, res) => {
   if(!searchCandidate.checkPasswordCorrect(newPassword)){
     throw new ApiError(500, "DbError : Password not chenged")
   }
-
+  // send Email
+  sendEmail(searchCandidate.emailId, "Candidate Password change",`Candidate password chenge successFully. \nDate : ${new Date} \n NewPaasword : ${newPassword}`)
   // clear all cookie and return responce with success message
   return res
   .status(200)
@@ -738,7 +749,7 @@ export const deleteCandidate = AsyncHandler(async (req, res) => {
   // serch Candidate by user id
   let searchCandidate
   try {
-    searchCandidate = await Candidate.findById(ueq.userId).select("_id")
+    searchCandidate = await Candidate.findById(ueq.userId).select("_id emailId")
   } catch (error) {
     throw new ApiError(500, `DbError : ${error.message || "Unable to search Candidate"}`)
   }
@@ -751,6 +762,8 @@ export const deleteCandidate = AsyncHandler(async (req, res) => {
   } catch (error) {
     throw new ApiError(500, `DbError : ${error.message || "unable to delete Candidate"}`)
   }
+  // send Email
+  sendEmail(searchCandidate.emailId, "Candidate Accound Deleted", `Your candidate Account ${searchCandidate.emailId} deleted \nDate : ${new Date}`)
   // clear all cookie and return responce with successMessage
   return res
   .status(200)
@@ -1208,7 +1221,6 @@ export const getApplicationDetails = AsyncHandler(async (req, res) => {
   return res
   .status(200)
   .json(new ApiResponce(200,reteiveApplication, "siccessMessage : Application all data reteived"))
-
 })
 
 export const getEmployeeDetails = AsyncHandler(async (req, res) => {
@@ -1256,5 +1268,4 @@ export const getEmployeeDetails = AsyncHandler(async (req, res) => {
   return res 
   .status(200)
   .json(new ApiResponce(200, searchEmployee, "successMessage : candidate datails returned"))
-
 });
