@@ -1,0 +1,104 @@
+body {
+  background-color: rgb(215, 169, 83);
+  font-size: 105%;
+  margin: 0;
+  padding: 0;
+}
+
+.header {
+  background-color: rgb(255, 186, 59);
+  margin: 0;
+  font-size: xx-large;
+  font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  text-align: center;
+}
+h1{
+  margin-top: 0;
+  padding-top: 10px;
+}
+
+img {
+  width: 60%;
+  display: flex;
+  justify-items: center;
+  margin: auto;
+
+}
+.pic-text{
+  margin: auto;
+  text-align: center;
+}
+main div{
+  margin: 3%;
+  padding: 2%;
+  padding-top: 0%;
+  border: 2px solid black;
+  border-radius: 5px; 
+}
+
+footer {
+  margin: 20px 50px;
+}
+.content:hover{
+  font-size: 105%;
+
+}
+
+div h2{
+  margin-bottom: 1%;
+  font-size: 1.9em;
+}
+.intro p{
+  margin: 5PX;
+}
+
+.intro{
+  font-family:  Calibri, 'Trebuchet MS', sans-serif;
+  margin-top: 5%;
+  padding-top: 2%;
+  
+}
+.circle-button{
+  height: 20px;
+  width: 20px;
+  border: 2px solid rgb(31, 30, 30) ;
+  border-radius: 50%;
+  display: flex inline;
+  align-items: center;
+  justify-content: center;
+
+}
+
+.collapsible {
+  font-size: larger;
+  cursor: pointer;
+  background-color: rgb(239, 238, 237);
+  
+}
+.collapsible h3{
+  padding: 5px;
+  border: 1px solid black;
+  border-radius: 4px;
+  user-select: none;
+  margin-bottom: 0;
+}
+
+.active h3 {
+  border-bottom: none;
+  border-bottom-left-radius: 0%;
+  border-bottom-right-radius: 0%;
+}
+
+.active, .collapsible:hover {
+  background-color: rgb(235, 204, 141);
+}
+
+
+.content {
+  border: 1px solid black;
+  border-top: none;
+  margin-top: 0;
+  padding: 0 10px;
+  display: none;
+  overflow: hidden;
+}
