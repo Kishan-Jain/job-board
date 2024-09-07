@@ -56,7 +56,7 @@ const CandidatesSchema = new Schema(
           ref: "Application",
         },
         date: Date,
-      }
+      },
     ],
     sortedApplication: [
       {
@@ -65,7 +65,7 @@ const CandidatesSchema = new Schema(
           ref: "Application",
         },
         date: Date,
-      }
+      },
     ],
     rejectedApplication: [
       {
@@ -74,7 +74,110 @@ const CandidatesSchema = new Schema(
           ref: "Application",
         },
         date: Date,
+      },
+    ],
+    connectionRequestSendList : [{
+      userId : {
+        type:String,
+        required : true,
+        unique : true
+      },
+      userType : String,
+      fullName : String,
+      Date : {
+        type : Date,
+        default : Date.now()
       }
+    }],
+    connectionRequestReceivedList: [
+      {
+        userId: {
+          type: String,
+          required: true,
+          unique: true,
+        },
+        userType: String,
+        fullName: String,
+        Date: {
+          type: Date,
+          default: Date.now(),
+        },
+      },
+    ],
+    connectionList: [
+      {
+        userId: {
+          type: String,
+          required: true,
+          unique: true,
+        },
+        userType: String,
+        fullName: String,
+        Date: {
+          type: Date,
+          default: Date.now(),
+        },
+      },
+    ],
+    followersRequestList: [
+      {
+        userId: {
+          type: String,
+          required: true,
+          unique: true,
+        },
+        userType: String,
+        fullName: String,
+        Date: {
+          type: Date,
+          default: Date.now(),
+        },
+      },
+    ],
+    followingRequestList: [
+      {
+        userId: {
+          type: String,
+          required: true,
+          unique: true,
+        },
+        userType: String,
+        fullName: String,
+        Date: {
+          type: Date,
+          default: Date.now(),
+        },
+      },
+    ],
+    followersList: [
+      {
+        userId: {
+          type: String,
+          required: true,
+          unique: true,
+        },
+        userType: String,
+        fullName: String,
+        Date: {
+          type: Date,
+          default: Date.now(),
+        },
+      },
+    ],
+    followingList: [
+      {
+        userId: {
+          type: String,
+          required: true,
+          unique: true,
+        },
+        userType: String,
+        fullName: String,
+        Date: {
+          type: Date,
+          default: Date.now(),
+        },
+      },
     ],
   },
   { timestamps: true }

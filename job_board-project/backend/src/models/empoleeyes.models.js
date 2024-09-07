@@ -61,6 +61,97 @@ const EmployeeSchema = new Schema({
 			}, 
 		jobAddDate : Date,
 		addDate : Date
+	}],
+	connectionRequestSendList : [{
+		userId : {
+			type:String,
+			required : true,
+			unique : true
+		},
+		userType : String,
+		fullName : String,
+		Date : {
+			type : Date,
+			default : Date.now()
+		}
+	}],
+	connectionRequestReceivedList : [{
+		userId : {
+			type:String,
+			required : true,
+			unique : true
+		},
+		userType : String,
+		fullName : String,
+		Date : {
+			type : Date,
+			default : Date.now()
+		}
+	}],
+	connectionList : [{
+		userId : {
+			type:String,
+			required : true,
+			unique : true
+		},
+		userType : String,
+		fullName : String,
+		Date : {
+			type : Date,
+			default : Date.now()
+		}
+	}],
+	followersRequestList : [{
+		userId : {
+			type:String,
+			required : true,
+			unique : true
+		},
+		userType : String,
+		fullName : String,
+		Date : {
+			type : Date,
+			default : Date.now()
+		}
+	}],
+	followingRequestList : [{
+		userId : {
+			type:String,
+			required : true,
+			unique : true
+		},
+		userType : String,
+		fullName : String,
+		Date : {
+			type : Date,
+			default : Date.now()
+		}
+	}],
+	followersList : [{
+		userId : {
+			type:String,
+			required : true,
+			unique : true
+		},
+		userType : String,
+		fullName : String,
+		Date : {
+			type : Date,
+			default : Date.now()
+		}
+	}],
+	followingList : [{
+		userId : {
+			type:String,
+			required : true,
+			unique : true
+		},
+		userType : String,
+		fullName : String,
+		Date : {
+			type : Date,
+			default : Date.now()
+		}
 	}]
 }, { timestamps: true })
 
@@ -101,6 +192,7 @@ EmployeeSchema.methods.GenerateRefreshToken = async function () {
 		}
 	)
 }
+
 
 // models
 const Employee = model("Employee", EmployeeSchema)
