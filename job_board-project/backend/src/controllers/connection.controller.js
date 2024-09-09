@@ -10,7 +10,7 @@ import AsyncHandler from "../utils/AsyncHandler.js";
 import Employee from "../models/empoleeyes.models.js";
 import Candidate from "../models/candidates.models.js";
 
-const checkConnection = AsyncHandler(async (req, res) => {
+export const checkConnection = AsyncHandler(async (req, res) => {
   /**
    * check user is logged in
    * validate user
@@ -20,16 +20,15 @@ const checkConnection = AsyncHandler(async (req, res) => {
    * return responce
    */
 
-  
   // check user is login
-  if(!req.userId){
-
+  if (!req.userId) {
+    throw new ApiError(400, "LoginError : User not logged in")
   }
-  if (req.userId !== req.params?.userId){
-
+  if (req.userId !== req.params?.userId) {
+    throw new ApiError(401, "AuthError : User not authorize")
   }
-  if(!req.type){
-
+  if (!req.type) {
+    throw new ApiError(400, "LoginError : User login Error")
   }
   // check user type
   if(req.type === "Employee"){
@@ -40,7 +39,7 @@ const checkConnection = AsyncHandler(async (req, res) => {
   }
 })
 
-const getAllReceivedConnectionRequest = AsyncHandler(async (req, res) => {
+export const getAllReceivedConnectionRequest = AsyncHandler(async (req, res) => {
   /**
    * check user is logged in
    * validate user
@@ -49,14 +48,14 @@ const getAllReceivedConnectionRequest = AsyncHandler(async (req, res) => {
    */
   
   // check user is login
-  if(!req.userId){
-
+  if (!req.userId) {
+    throw new ApiError(400, "LoginError : User not logged in")
   }
-  if (req.userId !== req.params?.userId){
-
+  if (req.userId !== req.params?.userId) {
+    throw new ApiError(401, "AuthError : User not authorize")
   }
-  if(!req.type){
-
+  if (!req.type) {
+    throw new ApiError(400, "LoginError : User login Error")
   }
   // check user type
   if(req.type === "Employee"){
@@ -67,7 +66,7 @@ const getAllReceivedConnectionRequest = AsyncHandler(async (req, res) => {
   }
 })
 
-const getAllSendConnectionRequest = AsyncHandler(async (req, res) => {
+export const getAllSendConnectionRequest = AsyncHandler(async (req, res) => {
   /**
    * check user is logged in
    * validate user
@@ -76,14 +75,14 @@ const getAllSendConnectionRequest = AsyncHandler(async (req, res) => {
    */
   
   // check user is login
-  if(!req.userId){
-
+  if (!req.userId) {
+    throw new ApiError(400, "LoginError : User not logged in")
   }
-  if (req.userId !== req.params?.userId){
-
+  if (req.userId !== req.params?.userId) {
+    throw new ApiError(401, "AuthError : User not authorize")
   }
-  if(!req.type){
-
+  if (!req.type) {
+    throw new ApiError(400, "LoginError : User login Error")
   }
   // check user type
   if(req.type === "Employee"){
@@ -94,7 +93,7 @@ const getAllSendConnectionRequest = AsyncHandler(async (req, res) => {
   }
 })
 
-const sendConnectionRequest = AsyncHandler(async (req, res) => {
+export const sendConnectionRequest = AsyncHandler(async (req, res) => {
   /**
    * check user is logged in
    * validate user
@@ -105,14 +104,14 @@ const sendConnectionRequest = AsyncHandler(async (req, res) => {
    */
   
   // check user is login
-  if(!req.userId){
-
+  if (!req.userId) {
+    throw new ApiError(400, "LoginError : User not logged in")
   }
-  if (req.userId !== req.params?.userId){
-
+  if (req.userId !== req.params?.userId) {
+    throw new ApiError(401, "AuthError : User not authorize")
   }
-  if(!req.type){
-
+  if (!req.type) {
+    throw new ApiError(400, "LoginError : User login Error")
   }
   // check user type
   if(req.type === "Employee"){
@@ -124,7 +123,7 @@ const sendConnectionRequest = AsyncHandler(async (req, res) => {
 })
 
 
-const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
+export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
   /**
    * check user is logged in
    * validate user
@@ -136,14 +135,14 @@ const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
    */
   
   // check user is login
-  if(!req.userId){
-
+  if (!req.userId) {
+    throw new ApiError(400, "LoginError : User not logged in")
   }
-  if (req.userId !== req.params?.userId){
-
+  if (req.userId !== req.params?.userId) {
+    throw new ApiError(401, "AuthError : User not authorize")
   }
-  if(!req.type){
-
+  if (!req.type) {
+    throw new ApiError(400, "LoginError : User login Error")
   }
   // check user type
   if(req.type === "Employee"){
@@ -154,7 +153,7 @@ const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
   }
 })
 
-const brackConnection = AsyncHandler(async (req, res) => {
+export const brackConnection = AsyncHandler(async (req, res) => {
   /**
    * check user is logged in
    * check users also connected
@@ -163,14 +162,14 @@ const brackConnection = AsyncHandler(async (req, res) => {
    */
   
   // check user is login
-  if(!req.userId){
-
+  if (!req.userId) {
+    throw new ApiError(400, "LoginError : User not logged in")
   }
-  if (req.userId !== req.params?.userId){
-
+  if (req.userId !== req.params?.userId) {
+    throw new ApiError(401, "AuthError : User not authorize")
   }
-  if(!req.type){
-
+  if (!req.type) {
+    throw new ApiError(400, "LoginError : User login Error")
   }
   // check user type
   if(req.type === "Employee"){
@@ -181,7 +180,7 @@ const brackConnection = AsyncHandler(async (req, res) => {
   }
 })
 
-const cancelConnectionSendRequest = AsyncHandler(async (req, res) => {
+export const cancelConnectionSendRequest = AsyncHandler(async (req, res) => {
   /**
    * check user is logged in
    * check connection request availabel on user connection request list
@@ -190,14 +189,14 @@ const cancelConnectionSendRequest = AsyncHandler(async (req, res) => {
    */
   
   // check user is login
-  if(!req.userId){
-
+  if (!req.userId) {
+    throw new ApiError(400, "LoginError : User not logged in")
   }
-  if (req.userId !== req.params?.userId){
-
+  if (req.userId !== req.params?.userId) {
+    throw new ApiError(401, "AuthError : User not authorize")
   }
-  if(!req.type){
-
+  if (!req.type) {
+    throw new ApiError(400, "LoginError : User login Error")
   }
   // check user type
   if(req.type === "Employee"){
