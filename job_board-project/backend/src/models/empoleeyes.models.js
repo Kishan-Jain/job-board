@@ -71,8 +71,7 @@ const EmployeeSchema = new Schema({
 		userType : String,
 		fullName : String,
 		Date : {
-			type : Date,
-			default : Date.now()
+			type : Date
 		}
 	}],
 	connectionRequestReceivedList : [{
@@ -84,8 +83,7 @@ const EmployeeSchema = new Schema({
 		userType : String,
 		fullName : String,
 		Date : {
-			type : Date,
-			default : Date.now()
+			type : Date
 		}
 	}],
 	connectionList : [{
@@ -97,8 +95,7 @@ const EmployeeSchema = new Schema({
 		userType : String,
 		fullName : String,
 		Date : {
-			type : Date,
-			default : Date.now()
+			type : Date
 		}
 	}],
 	followersRequestList : [{
@@ -110,8 +107,7 @@ const EmployeeSchema = new Schema({
 		userType : String,
 		fullName : String,
 		Date : {
-			type : Date,
-			default : Date.now()
+			type : Date
 		}
 	}],
 	followingRequestList : [{
@@ -123,8 +119,7 @@ const EmployeeSchema = new Schema({
 		userType : String,
 		fullName : String,
 		Date : {
-			type : Date,
-			default : Date.now()
+			type : Date
 		}
 	}],
 	followersList : [{
@@ -136,8 +131,7 @@ const EmployeeSchema = new Schema({
 		userType : String,
 		fullName : String,
 		Date : {
-			type : Date,
-			default : Date.now()
+			type : Date
 		}
 	}],
 	followingList : [{
@@ -149,8 +143,7 @@ const EmployeeSchema = new Schema({
 		userType : String,
 		fullName : String,
 		Date : {
-			type : Date,
-			default : Date.now()
+			type : Date
 		}
 	}]
 }, { timestamps: true })

@@ -1,6 +1,8 @@
 /**
  * Get all followers
  * Get all following
+ * get all followers request
+ * get all following request
  * remove to followed list
  * remove to folloeing list
  * check followed
@@ -28,21 +30,23 @@ export const getAllFollowingData = AsyncHandler(async (req, res) => {
   if (!req.userId) {
     throw new ApiError(400, "LoginError : User not logged in");
   }
-  if (!req.type) {
+  if (!req.userType) {
     throw new ApiError(400, "LoginError : User login Error");
   }
-  if (req.userType !== req.params?.userType) {
+  if (req.userId !== req.params?.userId) {
     throw new ApiError(401, "AuthError : User not authorize");
   }
   if (req.userType !== req.params?.userType) {
     throw new ApiError(401, "AuthError : User not authorize");
   }
   // check user type
-  if (req.type === "Employee") {
+  if (req.userType === "Employee") {
     // search Employee Datils
     let searchEmployee;
     try {
-      searchEmployee = await Employee.findById(req.userId).select("-password");
+      searchEmployee = await Employee.findById(req.userId).select(
+        "followingList"
+      );
     } catch (error) {
       throw new ApiError(
         500,
@@ -52,11 +56,13 @@ export const getAllFollowingData = AsyncHandler(async (req, res) => {
     if (!searchEmployee) {
       throw new ApiError(404, "DataError : Employee not found");
     }
+
     // reteive following list from Employee
     const followingList = searchEmployee.followingList;
     if (!followingList) {
       throw new ApiError(404, "DbError : No any follawing list find");
     }
+
     // return responce with following list
     return res
       .status(200)
@@ -67,12 +73,12 @@ export const getAllFollowingData = AsyncHandler(async (req, res) => {
           "successMessage : All following data received"
         )
       );
-  } else if (req.type === "Candidate") {
+  } else if (req.userType === "Candidate") {
     // search Candidate Datils
     let searchCandidate;
     try {
       searchCandidate = await Candidate.findById(req.userId).select(
-        "-password"
+        "followingList"
       );
     } catch (error) {
       throw new ApiError(
@@ -83,7 +89,7 @@ export const getAllFollowingData = AsyncHandler(async (req, res) => {
     if (!searchCandidate) {
       throw new ApiError(404, "DataError : Candidate not found");
     }
-    // reti
+
     const followingList = searchCandidate.followingList;
     if (!followingList) {
       throw new ApiError(404, "DbError : No any follwing list find");
@@ -112,7 +118,7 @@ export const getAllFollowersData = AsyncHandler(async (req, res) => {
   if (!req.userId) {
     throw new ApiError(400, "LoginError : User not logged in");
   }
-  if (!req.type) {
+  if (!req.userType) {
     throw new ApiError(400, "LoginError : User login Error");
   }
   if (req.userId !== req.params?.userId) {
@@ -122,11 +128,13 @@ export const getAllFollowersData = AsyncHandler(async (req, res) => {
     throw new ApiError(401, "AuthError : User not authorize");
   }
   // check user type
-  if (req.type === "Employee") {
+  if (req.userType === "Employee") {
     // search Employee Datils
     let searchEmployee;
     try {
-      searchEmployee = await Employee.findById(req.userId).select("-password");
+      searchEmployee = await Employee.findById(req.userId).select(
+        "followersList"
+      );
     } catch (error) {
       throw new ApiError(
         500,
@@ -149,12 +157,12 @@ export const getAllFollowersData = AsyncHandler(async (req, res) => {
           "successMessage : All followers data received"
         )
       );
-  } else if (req.type === "Candidate") {
+  } else if (req.userType === "Candidate") {
     // search Candidate Datils
     let searchCandidate;
     try {
       searchCandidate = await Candidate.findById(req.userId).select(
-        "-password"
+        "followersList"
       );
     } catch (error) {
       throw new ApiError(
@@ -181,6 +189,183 @@ export const getAllFollowersData = AsyncHandler(async (req, res) => {
   }
 });
 
+export const getAllFollowingRequestData = AsyncHandler(async (req, res) => {
+  /**
+   * check user is logged in
+   * validate user details
+   * reteive follow request list
+   * return responce
+   */
+
+  // check user is login
+  if (!req.userId) {
+    throw new ApiError(400, "LoginError : User not logged in");
+  }
+  if (!req.userType) {
+    throw new ApiError(400, "LoginError : User login Error");
+  }
+  if (req.userId !== req.params?.userId) {
+    throw new ApiError(401, "AuthError : User not authorize");
+  }
+  if (req.userType !== req.params?.userType) {
+    throw new ApiError(401, "AuthError : User not authorize");
+  }
+  // check user type
+  if (req.userType === "Employee") {
+    // search Employee Datils
+    let searchEmployee;
+    try {
+      searchEmployee = await Employee.findById(req.userId).select(
+        "followingRequestList"
+      );
+    } catch (error) {
+      throw new ApiError(
+        500,
+        `DbError : ${error.message || "Unable to find Employee"} `
+      );
+    }
+    if (!searchEmployee) {
+      throw new ApiError(404, "DataError : Employee not found");
+    }
+
+    // reteive following list from Employee
+    const followingRequestList = searchEmployee.followingRequestList;
+    if (!followingRequestList) {
+      throw new ApiError(404, "DbError : No any follawing request list find");
+    }
+
+    // return responce with following list
+    return res
+      .status(200)
+      .json(
+        new ApiResponce(
+          200,
+          followingRequestList,
+          "successMessage : All following request data received"
+        )
+      );
+  } else if (req.userType === "Candidate") {
+    // search Candidate Datils
+    let searchCandidate;
+    try {
+      searchCandidate = await Candidate.findById(req.userId).select(
+        "followingRequestList"
+      );
+    } catch (error) {
+      throw new ApiError(
+        500,
+        `DbError : ${error.message || "Unable to find Candidate"}`
+      );
+    }
+    if (!searchCandidate) {
+      throw new ApiError(404, "DataError : Candidate not found");
+    }
+
+    const followingRequestList = searchCandidate.followingRequestList;
+    if (!followingRequestList) {
+      throw new ApiError(404, "DbError : No any follwing request list find");
+    }
+    return res
+      .status(200)
+      .json(
+        new ApiResponce(
+          200,
+          followingRequestList,
+          "successMessage : All following request data received"
+        )
+      );
+  }
+});
+
+export const getAllFollowersRequestData = AsyncHandler(async (req, res) => {
+  /**
+   * check user is logged in
+   * validate user details
+   * reteive following list
+   * return responce
+   */
+
+  // check user is login
+  if (!req.userId) {
+    throw new ApiError(400, "LoginError : User not logged in");
+  }
+  if (!req.userType) {
+    throw new ApiError(400, "LoginError : User login Error");
+  }
+  if (req.userId !== req.params?.userId) {
+    throw new ApiError(401, "AuthError : User not authorize");
+  }
+  if (req.userType !== req.params?.userType) {
+    throw new ApiError(401, "AuthError : User not authorize");
+  }
+  // check user type
+  if (req.userType === "Employee") {
+    // search Employee Datils
+    let searchEmployee;
+    try {
+      searchEmployee = await Employee.findById(req.userId).select(
+        "followersRequestList"
+      );
+    } catch (error) {
+      throw new ApiError(
+        500,
+        `DbError : ${error.message || "Unable to find Employee"}`
+      );
+    }
+    if (!searchEmployee) {
+      throw new ApiError(404, "DataError : Employee not fonud");
+    }
+    const followersRequestList = searchEmployee.followersRequestList;
+    if (!followersRequestList) {
+      throw new ApiError(
+        400,
+        "DbError : Not received any followers request list"
+      );
+    }
+    return res
+      .status(200)
+      .json(
+        new ApiResponce(
+          200,
+          followersRequestList,
+          "successMessage : All followers request data received"
+        )
+      );
+  } else if (req.userType === "Candidate") {
+    // search Candidate Datils
+    let searchCandidate;
+    try {
+      searchCandidate = await Candidate.findById(req.userId).select(
+        "followersRequestList"
+      );
+    } catch (error) {
+      throw new ApiError(
+        500,
+        `DbError : ${error.message || "Unable to find candidate "}`
+      );
+    }
+    if (!searchCandidate) {
+      throw new ApiError(404, "DataError : Candidate not found");
+    }
+    const followersRequestList = searchCandidate.followersRequestList;
+    if (!followersRequestList) {
+      throw new ApiError(
+        400,
+        "DbError : Not received any followers request list"
+      );
+    }
+    return res
+      .status(200)
+      .json(
+        new ApiResponce(
+          200,
+          followersRequestList,
+          "successMessage : All followers request data received"
+        )
+      );
+  }
+});
+
 export const removeToFollowedList = AsyncHandler(async (req, res) => {
   /**
    * check user is logged in
@@ -194,7 +379,7 @@ export const removeToFollowedList = AsyncHandler(async (req, res) => {
   if (!req.userId) {
     throw new ApiError(400, "LoginError : User not logged in");
   }
-  if (!req.type) {
+  if (!req.userType) {
     throw new ApiError(400, "LoginError : User login Error");
   }
   if (req.userId !== req.params?.userId) {
@@ -207,7 +392,7 @@ export const removeToFollowedList = AsyncHandler(async (req, res) => {
     throw new ApiError(404, "DataError : No any params received");
   }
   // check user type
-  if (req.type === "Employee") {
+  if (req.userType === "Employee") {
     // search Employee Datils
     let searchEmployee;
     try {
@@ -222,13 +407,14 @@ export const removeToFollowedList = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DataError : Employee not find");
     }
     if (
-      !searchEmployee.followersList.find(
-        (userObject) => userObject.userId === req.params?.secondUserId
+      !searchEmployee.followersList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params?.secondUserId
       )
     ) {
       throw new ApiError(
         400,
-        "DataError : giver user id not exits in user followers list"
+        "DataError : second user id not exits in user followers list"
       );
     }
     let searchSecondUser;
@@ -236,7 +422,7 @@ export const removeToFollowedList = AsyncHandler(async (req, res) => {
       try {
         searchSecondUser = await Employee.findById(
           req.params.secondUserId
-        ).select("followersList followingList");
+        ).select("-password");
       } catch (error) {
         throw new ApiError(
           500,
@@ -247,7 +433,7 @@ export const removeToFollowedList = AsyncHandler(async (req, res) => {
       try {
         searchSecondUser = await Candidate.findById(
           req.params.secondUserId
-        ).select("followersList followingList");
+        ).select("-password");
       } catch (error) {
         throw new ApiError(
           500,
@@ -259,8 +445,8 @@ export const removeToFollowedList = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DataError : Second user id not correct");
     }
     if (
-      !searchSecondUser.followingList.find(
-        (userObject) => userObject.userId === req.userId
+      !searchSecondUser.followingList?.find(
+        (userObject) => userObject.userId?.toString() === req.userId
       )
     ) {
       throw new ApiError(
@@ -271,10 +457,11 @@ export const removeToFollowedList = AsyncHandler(async (req, res) => {
     // remove user id in listed
     try {
       const newFollowersList = searchEmployee.followersList.filter(
-        (userObject) => userObject.userId !== req.params.secondUserId
+        (userObject) =>
+          userObject.userId?.toString() !== searchSecondUser._id?.toString()
       );
       searchEmployee.followersList = newFollowersList;
-      await searchEmployee.save({ validateBeforeSave: true });
+      await searchEmployee.save({ validateBeforeSave: false });
     } catch (error) {
       throw new ApiError(
         500,
@@ -283,10 +470,11 @@ export const removeToFollowedList = AsyncHandler(async (req, res) => {
     }
     try {
       const newFollowingList = searchSecondUser.followingList.filter(
-        (userObject) => userObject.userId !== req.userId
+        (userObject) =>
+          userObject.userId?.toString() !== searchEmployee._id?.toString()
       );
       searchSecondUser.followingList = newFollowingList;
-      await searchSecondUser.save({ validateBeforeSave: true });
+      await searchSecondUser.save({ validateBeforeSave: false });
     } catch (error) {
       throw new ApiError(
         500,
@@ -342,10 +530,10 @@ export const removeToFollowedList = AsyncHandler(async (req, res) => {
         new ApiResponce(
           200,
           [updateSearchEmployee, updateSearchSecondUser],
-          "successMessage : All following data received"
+          "successMessage : followers remove successfully"
         )
       );
-  } else if (req.type === "Candidate") {
+  } else if (req.userType === "Candidate") {
     // search Candidate Datils
     let searchCandidate;
     try {
@@ -363,11 +551,15 @@ export const removeToFollowedList = AsyncHandler(async (req, res) => {
     }
 
     if (
-      !searchCandidate.followersList.find(
-        (userObject) => userObject.userId === req.params?.secondUserId
+      !searchCandidate.followersList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params?.secondUserId
       )
     ) {
-      throw new ApiError(400, "DBError : user followers list not reteived");
+      throw new ApiError(
+        400,
+        "DBError : second user Id not exits in user followers list"
+      );
     }
     let searchSecondUser;
     if (req.params?.secondUserType === "Employee") {
@@ -385,7 +577,7 @@ export const removeToFollowedList = AsyncHandler(async (req, res) => {
       try {
         searchSecondUser = await Candidate.findById(
           req.params.secondUserId
-        ).select("followersList followingList");
+        ).select("-password");
       } catch (error) {
         throw new ApiError(
           500,
@@ -397,19 +589,23 @@ export const removeToFollowedList = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DataError : sercond user Id not correct");
     }
     if (
-      !searchSecondUser.followingList.find(
-        (userObject) => userObject.userId === req.userId
+      !searchSecondUser.followingList?.find(
+        (userObject) => userObject.userId?.toString() === req.userId
       )
     ) {
-      throw new ApiError(400, "DbError : second user following list not find");
+      throw new ApiError(
+        400,
+        "DbError : second user id not find following list"
+      );
     }
-    // remove user id in listed
+    // remove user id from following and followers list
     try {
       const newFollowersList = searchCandidate.followersList.filter(
-        (userObject) => userObject.userId !== req.params.secondUserId
+        (userObject) =>
+          userObject.userId?.toString() !== searchSecondUser._id?.toString()
       );
       searchCandidate.followersList = newFollowersList;
-      await searchCandidate.save({ validateBeforeSave: true });
+      await searchCandidate.save({ validateBeforeSave: false });
     } catch (error) {
       throw new ApiError(
         500,
@@ -418,10 +614,11 @@ export const removeToFollowedList = AsyncHandler(async (req, res) => {
     }
     try {
       const newFollowingList = searchSecondUser.followingList.filter(
-        (userObject) => userObject.userId !== req.userId
+        (userObject) =>
+          userObject.userId?.toString() !== searchCandidate._id?.toString()
       );
       searchSecondUser.followingList = newFollowingList;
-      await searchSecondUser.save({ validateBeforeSave: true });
+      await searchSecondUser.save({ validateBeforeSave: false });
     } catch (error) {
       throw new ApiError(
         500,
@@ -432,7 +629,7 @@ export const removeToFollowedList = AsyncHandler(async (req, res) => {
     }
     let updateSearchCandidate;
     try {
-      updateSearchCandidate = await Employee.findById(
+      updateSearchCandidate = await Candidate.findById(
         searchCandidate?._id
       ).select("followingList followersList");
     } catch (error) {
@@ -448,7 +645,7 @@ export const removeToFollowedList = AsyncHandler(async (req, res) => {
     if (req.params?.secondUserType === "Employee") {
       try {
         updateSearchSecondUser = await Employee.findById(
-          searchSecondUser._id
+          searchSecondUser._id?.toString()
         ).select("followingList followersList");
       } catch (error) {
         throw new ApiError(
@@ -469,7 +666,7 @@ export const removeToFollowedList = AsyncHandler(async (req, res) => {
       }
     }
     if (!updateSearchSecondUser) {
-      throw new ApiError(500, "DbError : Update second user not found");
+      throw new ApiError(500, "DbError : Updated second user not found");
     }
     return res
       .status(200)
@@ -477,7 +674,7 @@ export const removeToFollowedList = AsyncHandler(async (req, res) => {
         new ApiResponce(
           200,
           [updateSearchCandidate, updateSearchSecondUser],
-          "successMessage : All following data received"
+          "successMessage : Followers remove successfully"
         )
       );
   }
@@ -496,7 +693,7 @@ export const removeToFollowingList = AsyncHandler(async (req, res) => {
   if (!req.userId) {
     throw new ApiError(400, "LoginError : User not logged in");
   }
-  if (!req.type) {
+  if (!req.userType) {
     throw new ApiError(400, "LoginError : User login Error");
   }
   if (req.userId !== req.params?.userId) {
@@ -509,11 +706,13 @@ export const removeToFollowingList = AsyncHandler(async (req, res) => {
     throw new ApiError(404, "DataError : Parameters not received");
   }
   // check user type
-  if (req.type === "Employee") {
+  if (req.userType === "Employee") {
     // search Employee Datils
     let searchEmployee;
     try {
-      searchEmployee = await Employee.findById(req.userId).select("-password");
+      searchEmployee = await Employee.findById(req.userId).select(
+        "_id followingList"
+      );
     } catch (error) {
       throw new ApiError(
         500,
@@ -525,18 +724,22 @@ export const removeToFollowingList = AsyncHandler(async (req, res) => {
     }
 
     if (
-      !searchEmployee.followingList.find(
-        (userObject) => userObject.userId === req.params?.secondUserId
+      !searchEmployee.followingList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params?.secondUserId
       )
     ) {
-      throw new ApiError(400, "DbError : Employee following list not reteived");
+      throw new ApiError(
+        400,
+        "DbError : second user id ont exits in Employee following list"
+      );
     }
     let searchSecondUser;
     if (req.params?.secondUserType === "Employee") {
       try {
         searchSecondUser = await Employee.findById(
           req.params.secondUserId
-        ).select("followersList followingList");
+        ).select("_id followersList");
       } catch (error) {
         throw new ApiError(
           500,
@@ -547,7 +750,7 @@ export const removeToFollowingList = AsyncHandler(async (req, res) => {
       try {
         searchSecondUser = await Candidate.findById(
           req.params.secondUserId
-        ).select("followersList followingList");
+        ).select("_id followersList");
       } catch (error) {
         throw new ApiError(
           500,
@@ -559,8 +762,8 @@ export const removeToFollowingList = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DataError : Second user Id not connect");
     }
     if (
-      !searchSecondUser.followersList.find(
-        (userObject) => userObject.userId === req.userId
+      !searchSecondUser.followersList?.find(
+        (userObject) => userObject.userId?.toString() === req.userId
       )
     ) {
       throw new ApiError(
@@ -568,13 +771,14 @@ export const removeToFollowingList = AsyncHandler(async (req, res) => {
         "DataError : User id not exits in second user followers list"
       );
     }
-    // remove user id in listed
+    // remove user id from following and followers list
     try {
       const newFollowingList = searchEmployee.followingList.filter(
-        (userObject) => userObject.userId !== req.params.secondUserId
+        (userObject) =>
+          userObject.userId?.toString() !== searchSecondUser._id?.toString()
       );
       searchEmployee.followingList = newFollowingList;
-      await searchEmployee.save({ validateBeforeSave: true });
+      await searchEmployee.save({ validateBeforeSave: false });
     } catch (error) {
       throw new ApiError(
         500,
@@ -583,10 +787,11 @@ export const removeToFollowingList = AsyncHandler(async (req, res) => {
     }
     try {
       const newFollowersList = searchSecondUser.followersList.filter(
-        (userObject) => userObject.userId !== req.userId
+        (userObject) =>
+          userObject.userId?.toString() !== searchEmployee._id?.toString()
       );
       searchSecondUser.followersList = newFollowersList;
-      await searchSecondUser.save({ validateBeforeSave: true });
+      await searchSecondUser.save({ validateBeforeSave: false });
     } catch (error) {
       throw new ApiError(
         500,
@@ -645,12 +850,12 @@ export const removeToFollowingList = AsyncHandler(async (req, res) => {
           "successMessage : All following data received"
         )
       );
-  } else if (req.type === "Candidate") {
+  } else if (req.userType === "Candidate") {
     // search Candidate Datils
     let searchCandidate;
     try {
       searchCandidate = await Candidate.findById(req.userId).select(
-        "-password"
+        "_id followingList"
       );
     } catch (error) {
       throw new ApiError(
@@ -663,8 +868,9 @@ export const removeToFollowingList = AsyncHandler(async (req, res) => {
     }
 
     if (
-      !searchCandidate.followingList.find(
-        (userObject) => userObject.userId === req.params?.secondUserId
+      !searchCandidate.followingList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params?.secondUserId
       )
     ) {
       throw new ApiError(
@@ -677,7 +883,7 @@ export const removeToFollowingList = AsyncHandler(async (req, res) => {
       try {
         searchSecondUser = await Employee.findById(
           req.params.secondUserId
-        ).select("followersList followingList");
+        ).select("_id followersList");
       } catch (error) {
         throw new ApiError(
           500,
@@ -688,7 +894,7 @@ export const removeToFollowingList = AsyncHandler(async (req, res) => {
       try {
         searchSecondUser = await Candidate.findById(
           req.params.secondUserId
-        ).select("followersList followingList");
+        ).select("_id followersList");
       } catch (error) {
         throw new ApiError(
           500,
@@ -700,8 +906,8 @@ export const removeToFollowingList = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DataError : Second user Id not correct");
     }
     if (
-      !searchSecondUser.followersList.find(
-        (userObject) => userObject.userId === req.userId
+      !searchSecondUser.followersList?.find(
+        (userObject) => userObject.userId?.toString() === req.userId
       )
     ) {
       throw new ApiError(
@@ -709,13 +915,14 @@ export const removeToFollowingList = AsyncHandler(async (req, res) => {
         "DataError : user Id not exits in second user followers list"
       );
     }
-    // remove user id in listed
+    // remove user id for following and followers list
     try {
       const newFollowingList = searchCandidate.followingList.filter(
-        (userObject) => userObject.userId !== req.params.secondUserId
+        (userObject) =>
+          userObject.userId?.toString() !== searchSecondUser._id?.toString()
       );
       searchCandidate.followingList = newFollowingList;
-      await searchCandidate.save({ validateBeforeSave: true });
+      await searchCandidate.save({ validateBeforeSave: false });
     } catch (error) {
       throw new ApiError(
         500,
@@ -724,10 +931,11 @@ export const removeToFollowingList = AsyncHandler(async (req, res) => {
     }
     try {
       const newFollowersList = searchSecondUser.followersList.filter(
-        (userObject) => userObject.userId !== req.userId
+        (userObject) =>
+          userObject.userId?.toString() !== searchCandidate._id?.toString()
       );
       searchSecondUser.followersList = newFollowersList;
-      await searchSecondUser.save({ validateBeforeSave: true });
+      await searchSecondUser.save({ validateBeforeSave: false });
     } catch (error) {
       throw new ApiError(
         500,
@@ -801,7 +1009,7 @@ export const checkFollowed = AsyncHandler(async (req, res) => {
   if (!req.userId) {
     throw new ApiError(400, "LoginError : User not logged in");
   }
-  if (!req.type) {
+  if (!req.userType) {
     throw new ApiError(400, "LoginError : User login Error");
   }
   if (req.userId !== req.params?.userId) {
@@ -814,11 +1022,13 @@ export const checkFollowed = AsyncHandler(async (req, res) => {
     throw new ApiError(404, "DataError : Parameters not received");
   }
   // check user type
-  if (req.type === "Employee") {
+  if (req.userType === "Employee") {
     // search Employee Datils
     let searchEmployee;
     try {
-      searchEmployee = await Employee.findById(req.userId).select("-password");
+      searchEmployee = await Employee.findById(req.userId).select(
+        "followersList followersRequestList"
+      );
     } catch (error) {
       throw new ApiError(
         500,
@@ -828,17 +1038,20 @@ export const checkFollowed = AsyncHandler(async (req, res) => {
     if (!searchEmployee) {
       throw new ApiError(404, "DbError : Employee not found");
     }
+
     if (
-      searchEmployee.followersList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      searchEmployee.followersList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       return res
         .status(200)
         .json(new ApiResponce(200, {}, "successMessage : Followed"));
     } else if (
-      searchEmployee.followersRequestList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      searchEmployee.followersRequestList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       return res
@@ -849,12 +1062,12 @@ export const checkFollowed = AsyncHandler(async (req, res) => {
         .status(200)
         .json(new ApiResponce(200, {}, "successMessage : Not Followed"));
     }
-  } else if (req.type === "Candidate") {
+  } else if (req.userType === "Candidate") {
     // search Candidate Datils
     let searchCandidate;
     try {
       searchCandidate = await Candidate.findById(req.userId).select(
-        "-password"
+        "followersList followersRequestList"
       );
     } catch (error) {
       throw new ApiError(
@@ -866,16 +1079,18 @@ export const checkFollowed = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DBerror : Candidate not found");
     }
     if (
-      searchCandidate.followersList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      searchCandidate.followersList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       return res
         .status(200)
         .json(new ApiResponce(200, {}, "successMessage : Followed"));
     } else if (
-      searchCandidate.followersRequestList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      searchCandidate.followersRequestList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       return res
@@ -901,7 +1116,7 @@ export const checkFollowing = AsyncHandler(async (req, res) => {
   if (!req.userId) {
     throw new ApiError(400, "LoginError : User not logged in");
   }
-  if (!req.type) {
+  if (!req.userType) {
     throw new ApiError(400, "LoginError : User login Error");
   }
   if (req.userId !== req.params?.userId) {
@@ -914,11 +1129,13 @@ export const checkFollowing = AsyncHandler(async (req, res) => {
     throw new ApiError(404, "DataError : Parameters not received");
   }
   // check user type
-  if (req.type === "Employee") {
+  if (req.userType === "Employee") {
     // search Employee Datils
     let searchEmployee;
     try {
-      searchEmployee = await Employee.findById(req.userId).select("-password");
+      searchEmployee = await Employee.findById(req.userId).select(
+        "followingList followingRequestList"
+      );
     } catch (error) {
       throw new ApiError(
         500,
@@ -929,16 +1146,18 @@ export const checkFollowing = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DbError : Employee not found");
     }
     if (
-      searchEmployee.followingList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      searchEmployee.followingList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       return res
         .status(200)
         .json(new ApiResponce(200, {}, "successMessage : Following"));
     } else if (
-      searchEmployee.followingRequestList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      searchEmployee.followingRequestList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       return res
@@ -949,12 +1168,12 @@ export const checkFollowing = AsyncHandler(async (req, res) => {
         .status(200)
         .json(new ApiResponce(200, {}, "successMessage : Not Following"));
     }
-  } else if (req.type === "Candidate") {
+  } else if (req.userType === "Candidate") {
     // search Candidate Datils
     let searchCandidate;
     try {
       searchCandidate = await Candidate.findById(req.userId).select(
-        "-password"
+        "followingList followingRequestList"
       );
     } catch (error) {
       throw new ApiError(
@@ -966,16 +1185,18 @@ export const checkFollowing = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DBerror : Candidate not found");
     }
     if (
-      searchCandidate.followingList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      searchCandidate.followingList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       return res
         .status(200)
         .json(new ApiResponce(200, {}, "successMessage : Following"));
     } else if (
-      searchCandidate.followingRequestList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      searchCandidate.followingRequestList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       return res
@@ -1002,7 +1223,7 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
   if (!req.userId) {
     throw new ApiError(400, "LoginError : User not logged in");
   }
-  if (!req.type) {
+  if (!req.userType) {
     throw new ApiError(400, "LoginError : User login Error");
   }
   if (req.userId !== req.params?.userId) {
@@ -1015,11 +1236,13 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
     throw new ApiError(404, "DataError : Parameters not received");
   }
   // check user type
-  if (req.type === "Employee") {
+  if (req.userType === "Employee") {
     // search Employee Datils
     let searchEmployee;
     try {
-      searchEmployee = await Employee.findById(req.userId).select("-password");
+      searchEmployee = await Employee.findById(req.userId).select(
+        "_id followersList followersRequestList followingList followingRequestList"
+      );
     } catch (error) {
       throw new ApiError(
         500,
@@ -1030,8 +1253,9 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DbError : Employee not found");
     }
     if (
-      searchEmployee.followingList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      searchEmployee.followersList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       throw new ApiError(
@@ -1040,8 +1264,9 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
       );
     }
     if (
-      searchEmployee.followingRequestList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      searchEmployee.followersRequestList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       throw new ApiError(
@@ -1054,7 +1279,9 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
       try {
         searchSecondUser = await Employee.findById(
           req.params.secondUserId
-        ).select("followersList followingList");
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
+        );
       } catch (error) {
         throw new ApiError(
           500,
@@ -1065,7 +1292,9 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
       try {
         searchSecondUser = await Candidate.findById(
           req.params.secondUserId
-        ).select("followersList followingList");
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
+        );
       } catch (error) {
         throw new ApiError(
           500,
@@ -1077,26 +1306,30 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DataError : Second user Id not connect");
     }
     const secondUserDetails = {
-      userId: searchSecondUser._id,
+      userId: searchSecondUser._id?.toString(),
       fullname: searchSecondUser.fullName,
       userType: req.params?.secondUserType,
+      Date: Date.now(),
     };
     const userDetails = {
-      userId: searchEmployee._id,
+      userId: searchEmployee._id?.toString(),
       fullName: searchEmployee.fullName,
       userType: "Employee",
+      Date: Date.now(),
     };
     let updateSearchEmployee;
     try {
       updateSearchEmployee = await Employee.findByIdAndUpdate(
-        searchEmployee._id,
+        searchEmployee._id?.toString(),
         {
           $push: {
             followingRequestList: secondUserDetails,
           },
         },
         { new: true }
-      ).select("-password");
+      ).select(
+        "_id followersList followersRequestList followingList followingRequestList"
+      );
     } catch (error) {
       throw new ApiError(
         500,
@@ -1110,12 +1343,15 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
     if (req.params?.secondUserType === "Employee") {
       try {
         updateSearchSecondUser = await Employee.findByIdAndUpdate(
-          searchSecondUser._id,
+          searchSecondUser._id?.toString(),
           {
             $push: {
               followersRequestList: userDetails,
             },
-          }
+          },
+          { new: true }
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
         );
       } catch (error) {
         throw new ApiError(
@@ -1126,12 +1362,15 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
     } else if (req.params?.secondUserType === "Candidate") {
       try {
         updateSearchSecondUser = await Candidate.findByIdAndUpdate(
-          searchSecondUser._id,
+          searchSecondUser._id?.toString(),
           {
             $push: {
               followersRequestList: userDetails,
             },
-          }
+          },
+          { new: true }
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
         );
       } catch (error) {
         throw new ApiError(
@@ -1152,12 +1391,12 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
           "successMessage : Following request send successfully"
         )
       );
-  } else if (req.type === "Candidate") {
+  } else if (req.userType === "Candidate") {
     // search Candidate Datils
     let searchCandidate;
     try {
       searchCandidate = await Candidate.findById(req.userId).select(
-        "-password"
+        "_id followersList followersRequestList followingList followingRequestList"
       );
     } catch (error) {
       throw new ApiError(
@@ -1169,8 +1408,9 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DBerror : Candidate not found");
     }
     if (
-      searchCandidate.followingList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      searchCandidate.followersList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       throw new ApiError(
@@ -1179,8 +1419,9 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
       );
     }
     if (
-      searchCandidate.followingRequestList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      searchCandidate.followersRequestList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       throw new ApiError(
@@ -1194,7 +1435,9 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
       try {
         searchSecondUser = await Employee.findById(
           req.params.secondUserId
-        ).select("followersList followingList");
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
+        );
       } catch (error) {
         throw new ApiError(
           500,
@@ -1205,7 +1448,9 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
       try {
         searchSecondUser = await Candidate.findById(
           req.params.secondUserId
-        ).select("followersList followingList");
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
+        );
       } catch (error) {
         throw new ApiError(
           500,
@@ -1217,7 +1462,7 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DataError : Second user Id not connect");
     }
     const secondUserDetails = {
-      userId: searchSecondUser._id,
+      userId: searchSecondUser._id?.toString(),
       fullname: searchSecondUser.fullName,
       userType: req.params?.secondUserType,
     };
@@ -1236,7 +1481,9 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
           },
         },
         { new: true }
-      ).select("-password");
+      ).select(
+        "_id followersList followersRequestList followingList followingRequestList"
+      );
     } catch (error) {
       throw new ApiError(
         500,
@@ -1250,12 +1497,15 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
     if (req.params?.secondUserType === "Employee") {
       try {
         updateSearchSecondUser = await Employee.findByIdAndUpdate(
-          searchSecondUser._id,
+          searchSecondUser._id?.toString(),
           {
             $push: {
               followersRequestList: userDetails,
             },
-          }
+          },
+          { new: true }
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
         );
       } catch (error) {
         throw new ApiError(
@@ -1266,12 +1516,15 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
     } else if (req.params?.secondUserType === "Candidate") {
       try {
         updateSearchSecondUser = await Candidate.findByIdAndUpdate(
-          searchSecondUser._id,
+          searchSecondUser._id?.toString(),
           {
             $push: {
               followersRequestList: userDetails,
             },
-          }
+          },
+          { new: true }
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
         );
       } catch (error) {
         throw new ApiError(
@@ -1311,7 +1564,7 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
   if (!req.userId) {
     throw new ApiError(400, "LoginError : User not logged in");
   }
-  if (!req.type) {
+  if (!req.userType) {
     throw new ApiError(400, "LoginError : User login Error");
   }
   if (req.userId !== req.params?.userId) {
@@ -1327,11 +1580,13 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
     throw new ApiError(404, "DataError : Responce Parameters not received");
   }
   // check user type
-  if (req.type === "Employee") {
+  if (req.userType === "Employee") {
     // search Employee Datils
     let searchEmployee;
     try {
-      searchEmployee = await Employee.findById(req.userId).select("-password");
+      searchEmployee = await Employee.findById(req.userId).select(
+        "_id followersList followersRequestList followingList followingRequestList"
+      );
     } catch (error) {
       throw new ApiError(
         500,
@@ -1342,8 +1597,9 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DbError : Employee not found");
     }
     if (
-      !searchEmployee.followersRequestList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      !searchEmployee.followersRequestList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       throw new ApiError(
@@ -1352,8 +1608,9 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       );
     }
     if (
-      searchEmployee.followingList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      searchEmployee.followersList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       throw new ApiError(
@@ -1366,7 +1623,9 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       try {
         searchSecondUser = await Employee.findById(
           req.params.secondUserId
-        ).select("followersList followingList");
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
+        );
       } catch (error) {
         throw new ApiError(
           500,
@@ -1377,7 +1636,9 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       try {
         searchSecondUser = await Candidate.findById(
           req.params.secondUserId
-        ).select("followersList followingList");
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
+        );
       } catch (error) {
         throw new ApiError(
           500,
@@ -1389,8 +1650,8 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DataError : Second user Id not connect");
     }
     if (
-      searchSecondUser.followersList.find(
-        (userObject) => userObject.userId === req.userId
+      searchSecondUser.followersList?.find(
+        (userObject) => userObject.userId?.toString() === req.userId
       )
     ) {
       throw new ApiError(
@@ -1399,8 +1660,8 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       );
     }
     if (
-      !searchSecondUser.followersRequestList.find(
-        (userObject) => userObject.userId === req.userId
+      !searchSecondUser.followersRequestList?.find(
+        (userObject) => userObject.userId?.toString() === req.userId
       )
     ) {
       throw new ApiError(
@@ -1411,26 +1672,28 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
     if (req.params?.responce === "Accept") {
       // create object
       const secondUserDetails = {
-        userId: searchSecondUser._id,
+        userId: searchSecondUser._id?.toString(),
         fullname: searchSecondUser.fullName,
         userType: req.params?.secondUserType,
       };
       const userDetails = {
-        userId: searchEmployee._id,
+        userId: searchEmployee._id?.toString(),
         fullName: searchEmployee.fullName,
         userType: "Employee",
       };
       let updateSearchEmployee;
       try {
         updateSearchEmployee = await Employee.findByIdAndUpdate(
-          searchEmployee._id,
+          searchEmployee._id?.toString(),
           {
             $push: {
               followersList: secondUserDetails,
             },
           },
           { new: true }
-        ).select("-password");
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
+        );
       } catch (error) {
         throw new ApiError(
           500,
@@ -1444,12 +1707,15 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       if (req.params?.secondUserType === "Employee") {
         try {
           updateSearchSecondUser = await Employee.findByIdAndUpdate(
-            searchSecondUser._id,
+            searchSecondUser._id?.toString(),
             {
               $push: {
                 followingList: userDetails,
               },
-            }
+            },
+            { new: true }
+          ).select(
+            "_id followersList followersRequestList followingList followingRequestList"
           );
         } catch (error) {
           throw new ApiError(
@@ -1460,12 +1726,15 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       } else if (req.params?.secondUserType === "Candidate") {
         try {
           updateSearchSecondUser = await Candidate.findByIdAndUpdate(
-            searchSecondUser._id,
+            searchSecondUser._id?.toString(),
             {
               $push: {
                 followersList: userDetails,
               },
-            }
+            },
+            { new: true }
+          ).select(
+            "_id followersList followersRequestList followingList followingRequestList"
           );
         } catch (error) {
           throw new ApiError(
@@ -1480,10 +1749,11 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       try {
         const newFollowRequestList =
           updateSearchEmployee.followersRequestList.filter(
-            (userObject) => userObject.userId !== updateSearchSecondUser
+            (userObject) =>
+              userObject.userId?.toString() !== updateSearchSecondUser
           );
         updateSearchEmployee.followersRequestList = newFollowRequestList;
-        updateSearchEmployee.save({ validateBeforeSave: false });
+        await updateSearchEmployee.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
@@ -1498,10 +1768,11 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       try {
         const newFollowingRequestList =
           updateSearchSecondUser.followingRequestList.filter(
-            (userObject) => userObject.userId !== updateSearchEmployee
+            (userObject) =>
+              userObject.userId?.toString() !== updateSearchEmployee
           );
         updateSearchEmployee.followingRequestList = newFollowingRequestList;
-        updateSearchEmployee.save({ validateBeforeSave: false });
+        await updateSearchEmployee.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
@@ -1522,10 +1793,11 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
     } else if (req.params?.responce === "Reject") {
       try {
         const newFollowRequestList = searchEmployee.followersRequestList.filter(
-          (userObject) => userObject.userId !== searchSecondUser
+          (userObject) =>
+            userObject.userId?.toString() !== searchSecondUser._id.toString()
         );
         searchEmployee.followersRequestList = newFollowRequestList;
-        searchEmployee.save({ validateBeforeSave: false });
+        await searchEmployee.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
@@ -1540,10 +1812,11 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       try {
         const newFollowingRequestList =
           searchSecondUser.followingRequestList.filter(
-            (userObject) => userObject.userId !== searchEmployee
+            (userObject) =>
+              userObject.userId?.toString() !== searchEmployee._id.toString()
           );
         searchEmployee.followingRequestList = newFollowingRequestList;
-        searchEmployee.save({ validateBeforeSave: false });
+        await searchEmployee.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
@@ -1561,12 +1834,12 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
           new ApiResponce(200, {}, "successMessage : Follow request rejected")
         );
     }
-  } else if (req.type === "Candidate") {
+  } else if (req.userType === "Candidate") {
     // search Candidate Datils
     let searchCandidate;
     try {
       searchCandidate = await Candidate.findById(req.userId).select(
-        "-password"
+        "_id followersList followersRequestList followingList followingRequestList"
       );
     } catch (error) {
       throw new ApiError(
@@ -1578,8 +1851,9 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DbError : Candidate not found");
     }
     if (
-      !searchCandidate.followersRequestList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      !searchCandidate.followersRequestList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       throw new ApiError(
@@ -1588,8 +1862,9 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       );
     }
     if (
-      searchCandidate.followersList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      searchCandidate.followersList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === searchSecondUser._id?.toString()
       )
     ) {
       throw new ApiError(
@@ -1603,7 +1878,9 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       try {
         searchSecondUser = await Employee.findById(
           req.params.secondUserId
-        ).select("followersList followingList");
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
+        );
       } catch (error) {
         throw new ApiError(
           500,
@@ -1614,7 +1891,9 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       try {
         searchSecondUser = await Candidate.findById(
           req.params.secondUserId
-        ).select("followersList followingList");
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
+        );
       } catch (error) {
         throw new ApiError(
           500,
@@ -1626,8 +1905,9 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DataError : Second user Id not connect");
     }
     if (
-      searchSecondUser.followersList.find(
-        (userObject) => userObject.userId === req.userId
+      searchSecondUser.followingList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === searchCandidate._id?.toString()
       )
     ) {
       throw new ApiError(
@@ -1636,8 +1916,9 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       );
     }
     if (
-      !searchSecondUser.followersRequestList.find(
-        (userObject) => userObject.userId === req.userId
+      !searchSecondUser.followingRequestList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === searchCandidate._id.toString()
       )
     ) {
       throw new ApiError(
@@ -1648,14 +1929,16 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
     if (req.params.responce === "Accept") {
       // create object
       const secondUserDetails = {
-        userId: searchSecondUser._id,
+        userId: searchSecondUser._id?.toString(),
         fullname: searchSecondUser.fullName,
         userType: req.params?.secondUserType,
+        Date: Date.now(),
       };
       const userDetails = {
         userId: searchCandidate._id,
         fullName: searchCandidate.fullName,
         userType: "Candidate",
+        Date: Date.now(),
       };
       let updateSearchCandidate;
       try {
@@ -1667,7 +1950,9 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
             },
           },
           { new: true }
-        ).select("-password");
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
+        );
       } catch (error) {
         throw new ApiError(
           500,
@@ -1681,12 +1966,15 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       if (req.params?.secondUserType === "Employee") {
         try {
           updateSearchSecondUser = await Employee.findByIdAndUpdate(
-            searchSecondUser._id,
+            searchSecondUser._id?.toString(),
             {
               $push: {
                 followingList: userDetails,
               },
-            }
+            },
+            { new: true }
+          ).select(
+            "_id followersList followersRequestList followingList followingRequestList"
           );
         } catch (error) {
           throw new ApiError(
@@ -1697,12 +1985,15 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       } else if (req.params?.secondUserType === "Candidate") {
         try {
           updateSearchSecondUser = await Candidate.findByIdAndUpdate(
-            searchSecondUser._id,
+            searchSecondUser._id?.toString(),
             {
               $push: {
                 followersList: userDetails,
               },
-            }
+            },
+            { new: true }
+          ).select(
+            "_id followersList followersRequestList followingList followingRequestList"
           );
         } catch (error) {
           throw new ApiError(
@@ -1717,10 +2008,12 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       try {
         const newFollowRequestList =
           updateSearchCandidate.followersRequestList.filter(
-            (userObject) => userObject.userId !== updateSearchSecondUser
+            (userObject) =>
+              userObject.userId?.toString() !==
+              updateSearchSecondUser._id?.toString()
           );
         updateSearchCandidate.followersRequestList = newFollowRequestList;
-        updateSearchCandidate.save({ validateBeforeSave: false });
+        await updateSearchCandidate.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
@@ -1735,10 +2028,12 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       try {
         const newFollowingRequestList =
           updateSearchSecondUser.followingRequestList.filter(
-            (userObject) => userObject.userId !== updateSearchCandidate
+            (userObject) =>
+              userObject.userId?.toString() !==
+              updateSearchCandidate._id?.toString()
           );
         updateSearchCandidate.followingRequestList = newFollowingRequestList;
-        updateSearchCandidate.save({ validateBeforeSave: false });
+        await updateSearchCandidate.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
@@ -1752,6 +2047,7 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       }
 
       return res
+
         .status(200)
         .json(
           new ApiResponce(200, {}, "successMessage : Follow request accepted")
@@ -1760,10 +2056,11 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       try {
         const newFollowRequestList =
           searchCandidate.followersRequestList.filter(
-            (userObject) => userObject.userId !== searchSecondUser
+            (userObject) =>
+              userObject.userId?.toString() !== searchSecondUser._id?.toString()
           );
         searchCandidate.followersRequestList = newFollowRequestList;
-        searchCandidate.save({ validateBeforeSave: false });
+        await searchCandidate.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
@@ -1778,10 +2075,11 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       try {
         const newFollowingRequestList =
           searchSecondUser.followingRequestList.filter(
-            (userObject) => userObject.userId !== searchCandidate
+            (userObject) =>
+              userObject.userId?.toString() !== searchCandidate._id?.toString()
           );
         searchCandidate.followingRequestList = newFollowingRequestList;
-        searchCandidate.save({ validateBeforeSave: false });
+        await searchCandidate.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
@@ -1816,7 +2114,7 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
   if (!req.userId) {
     throw new ApiError(400, "LoginError : User not logged in");
   }
-  if (!req.type) {
+  if (!req.userType) {
     throw new ApiError(400, "LoginError : User login Error");
   }
   if (req.userId !== req.params?.userId) {
@@ -1828,11 +2126,13 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
   if (!(req.params?.secondUserId && req.params?.secondUserType)) {
     throw new ApiError(404, "DataError : parameter not recevied");
   }
-  if (req.type === "Employee") {
+  if (req.userType === "Employee") {
     // search Employee Datils
     let searchEmployee;
     try {
-      searchEmployee = await Employee.findById(req.userId).select("-password");
+      searchEmployee = await Employee.findById(req.userId).select(
+        "_id followersList followersRequestList followingList followingRequestList"
+      );
     } catch (error) {
       throw new ApiError(
         500,
@@ -1843,8 +2143,9 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DbError : Employee not found");
     }
     if (
-      !searchEmployee.followingRequestList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      !searchEmployee.followersRequestList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       throw new ApiError(
@@ -1853,8 +2154,9 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
       );
     }
     if (
-      searchEmployee.followingList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      searchEmployee.followersList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       throw new ApiError(
@@ -1866,7 +2168,11 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
     let searchSecondUser;
     if (req.params?.secondUserType === "Employee") {
       try {
-        searchSecondUser = await Employee.findById(req.params?.secondUserId);
+        searchSecondUser = await Employee.findById(
+          req.params?.secondUserId
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
+        );
       } catch (error) {
         throw new ApiError(
           500,
@@ -1875,7 +2181,11 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
       }
     } else if (req.params?.secondUserType === "Candidate") {
       try {
-        searchSecondUser = await Candidate.findById(req.params?.secondUserId);
+        searchSecondUser = await Candidate.findById(
+          req.params?.secondUserId
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
+        );
       } catch (error) {
         throw new ApiError(
           500,
@@ -1889,10 +2199,11 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
     try {
       const newFollowingRequestList =
         searchEmployee.followingRequestList.filter(
-          (userObject) => userObject.userId !== searchSecondUser
+          (userObject) =>
+            userObject.userId?.toString() !== searchSecondUser._id?.toString()
         );
       searchEmployee.followingRequestList = newFollowingRequestList;
-      searchEmployee.save({ validateBeforeSave: false });
+      await searchEmployee.save({ validateBeforeSave: false });
     } catch (error) {
       throw new ApiError(
         500,
@@ -1902,10 +2213,11 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
     try {
       const newFollowersRequestList =
         searchSecondUser.followersRequestList.filter(
-          (userObject) => userObject.userId !== searchEmployee
+          (userObject) =>
+            userObject.userId?.toString() !== searchEmployee._id?.toString()
         );
-      searchEmployee.followersRequestList = newFollowersRequestList;
-      searchEmployee.save({ validateBeforeSave: false });
+      searchSecondUser.followersRequestList = newFollowersRequestList;
+      await searchSecondUser.save({ validateBeforeSave: false });
     } catch (error) {
       throw new ApiError(
         500,
@@ -1918,7 +2230,9 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
     try {
       updateSearchEmployee = await Employee.findById(
         searchEmployee?._id
-      ).select("followingList followersList");
+      ).select(
+        "_id followersList followersRequestList followingList followingRequestList"
+      );
     } catch (error) {
       throw new ApiError(
         500,
@@ -1932,8 +2246,10 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
     if (req.params?.secondUserType === "Employee") {
       try {
         updateSearchSecondUser = await Employee.findById(
-          searchSecondUser._id
-        ).select("followingList followersList");
+          searchSecondUser._id?.toString()
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
+        );
       } catch (error) {
         throw new ApiError(
           500,
@@ -1943,8 +2259,10 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
     } else if (req.params?.secondUserType === "Candidate") {
       try {
         updateSearchSecondUser = await Candidate.findById(
-          searchSecondUser._id
-        ).select("followingList followersList");
+          searchSecondUser._id?.toString()
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
+        );
       } catch (error) {
         throw new ApiError(
           500,
@@ -1955,12 +2273,12 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
     if (!updateSearchSecondUser) {
       throw new ApiError(500, "DbError : Update SecondUser not found");
     }
-  } else if (req.type === "Candidate") {
+  } else if (req.userType === "Candidate") {
     // search Candidate Datils
     let searchCandidate;
     try {
       searchCandidate = await Candidate.findById(req.userId).select(
-        "-password"
+        "_id followersList followersRequestList followingList followingRequestList"
       );
     } catch (error) {
       throw new ApiError(
@@ -1972,8 +2290,9 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DbError : Candidate not found");
     }
     if (
-      !searchCandidate.followingRequestList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      !searchCandidate.followersRequestList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       throw new ApiError(
@@ -1982,8 +2301,9 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
       );
     }
     if (
-      searchCandidate.followingList.find(
-        (userObject) => userObject.userId === req.params.secondUserId
+      searchCandidate.followersList?.find(
+        (userObject) =>
+          userObject.userId?.toString() === req.params.secondUserId
       )
     ) {
       throw new ApiError(500, "second user id exits in user following list");
@@ -1992,7 +2312,11 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
     let searchSecondUser;
     if (req.params?.secondUserType === "Employee") {
       try {
-        searchSecondUser = await Employee.findById(req.params?.secondUserId);
+        searchSecondUser = await Employee.findById(
+          req.params?.secondUserId
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
+        );
       } catch (error) {
         throw new ApiError(
           500,
@@ -2001,7 +2325,11 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
       }
     } else if (req.params?.secondUserType === "Candidate") {
       try {
-        searchSecondUser = await Candidate.findById(req.params?.secondUserId);
+        searchSecondUser = await Candidate.findById(
+          req.params?.secondUserId
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
+        );
       } catch (error) {
         throw new ApiError(
           500,
@@ -2015,10 +2343,11 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
     try {
       const newFollowIngRequestList =
         searchCandidate.followingRequestList.filter(
-          (userObject) => userObject.userId !== searchSecondUser
+          (userObject) =>
+            userObject.userId?.toString() !== searchSecondUser._id?.toString()
         );
       searchCandidate.followingRequestList = newFollowIngRequestList;
-      searchCandidate.save({ validateBeforeSave: false });
+      await searchCandidate.save({ validateBeforeSave: false });
     } catch (error) {
       throw new ApiError(
         500,
@@ -2028,10 +2357,11 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
     try {
       const newFollowersRequestList =
         searchSecondUser.followersRequestList.filter(
-          (userObject) => userObject.userId !== searchCandidate
+          (userObject) =>
+            userObject.userId?.toString() !== searchCandidate._id?.toString()
         );
       searchCandidate.followersRequestList = newFollowersRequestList;
-      searchCandidate.save({ validateBeforeSave: false });
+      await searchCandidate.save({ validateBeforeSave: false });
     } catch (error) {
       throw new ApiError(
         500,
@@ -2044,7 +2374,9 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
     try {
       updateSearchCandidate = await Candidate.findById(
         searchCandidate._id
-      ).select("followingList followersList");
+      ).select(
+        "_id followersList followersRequestList followingList followingRequestList"
+      );
     } catch (error) {
       throw new ApiError(
         500,
@@ -2057,8 +2389,10 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
     if (req.params?.secondUserId === "Employee") {
       try {
         updatedSearchSecondUser = await Employee.findById(
-          searchSecondUser._id
-        ).select("followingList followersList");
+          searchSecondUser._id?.toString()
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
+        );
       } catch (error) {
         throw new ApiError(
           500,
@@ -2068,8 +2402,10 @@ export const cancelFollowingRequst = AsyncHandler(async (req, res) => {
     } else if (req.params?.secondUserId === "Candidate") {
       try {
         updatedSearchSecondUser = await Candidate.findById(
-          searchSecondUser._id
-        ).select("followingList followersList");
+          searchSecondUser._id?.toString()
+        ).select(
+          "_id followersList followersRequestList followingList followingRequestList"
+        );
       } catch (error) {
         throw new ApiError(
           500,

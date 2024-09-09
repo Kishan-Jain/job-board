@@ -85,8 +85,7 @@ const CandidatesSchema = new Schema(
       userType : String,
       fullName : String,
       Date : {
-        type : Date,
-        default : Date.now()
+        type : Date
       }
     }],
     connectionRequestReceivedList: [
@@ -99,8 +98,7 @@ const CandidatesSchema = new Schema(
         userType: String,
         fullName: String,
         Date: {
-          type: Date,
-          default: Date.now(),
+          type: Date
         },
       },
     ],
@@ -114,8 +112,7 @@ const CandidatesSchema = new Schema(
         userType: String,
         fullName: String,
         Date: {
-          type: Date,
-          default: Date.now(),
+          type: Date
         },
       },
     ],
@@ -129,8 +126,7 @@ const CandidatesSchema = new Schema(
         userType: String,
         fullName: String,
         Date: {
-          type: Date,
-          default: Date.now(),
+          type: Date
         },
       },
     ],
@@ -144,8 +140,7 @@ const CandidatesSchema = new Schema(
         userType: String,
         fullName: String,
         Date: {
-          type: Date,
-          default: Date.now(),
+          type: Date
         },
       },
     ],
@@ -159,8 +154,7 @@ const CandidatesSchema = new Schema(
         userType: String,
         fullName: String,
         Date: {
-          type: Date,
-          default: Date.now(),
+          type: Date
         },
       },
     ],
@@ -174,8 +168,7 @@ const CandidatesSchema = new Schema(
         userType: String,
         fullName: String,
         Date: {
-          type: Date,
-          default: Date.now(),
+          type: Date
         },
       },
     ],

@@ -1,6 +1,6 @@
 import {Router} from "express";
 import {isLogin} from "../middlewares/auth.middlewares.js"
-import { cancelFollowingRequst, checkFollowed, checkFollowing, getAllFollowersData, getAllFollowingData, removeToFollowedList, removeToFollowingList, responceOnFollowRequest, sendFollowRequest } from "../controllers/following.controller.js"
+import { cancelFollowingRequst, checkFollowed, checkFollowing, getAllFollowersData, getAllFollowersRequestData, getAllFollowingData, getAllFollowingRequestData, removeToFollowedList, removeToFollowingList, responceOnFollowRequest, sendFollowRequest } from "../controllers/following.controller.js"
 
 const followingRouter = Router()
 
@@ -9,6 +9,12 @@ followingRouter.route("/:userType/:userId/getAllFollowingData").get(
 )
 followingRouter.route("/:userType/:userId/getAllFollowersData").get(
   isLogin, getAllFollowersData
+)
+followingRouter.route("/:userType/:userId/getAllFollowingRequestData").get(
+  isLogin, getAllFollowersRequestData
+)
+followingRouter.route("/:userType/:userId/getAllFollowersRequestData").get(
+  isLogin, getAllFollowingRequestData
 )
 followingRouter.route("/:userType/:userId/checkFollowed/:secondUserType/:secondUserId").get(
   isLogin, checkFollowed
@@ -30,7 +36,7 @@ followingRouter.route("/:userType/:userId/responceOnFollowRequest/:responce/:sec
   isLogin, responceOnFollowRequest
 )
 
-followingRouter.route("/:userType/:userId/cancelFollowingRequest/:sexondUserType/:secondUserId").post(
+followingRouter.route("/:userType/:userId/cancelFollowingRequest/:secondUserType/:secondUserId").post(
   isLogin, cancelFollowingRequst
 )
 
