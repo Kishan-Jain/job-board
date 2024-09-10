@@ -8,10 +8,10 @@
  */
 
 import AsyncHandler from "../utils/AsyncHandler.js";
-import Employee from "../models/empoleeyes.models.js";
-import Candidate from "../models/candidates.models.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponce from "../utils/ApiResponce.js";
+import Employee from "../models/empoleeyes.models.js";
+import Candidate from "../models/candidates.models.js";
 
 export const getAllConnectionData = AsyncHandler(async (req, res) => {
   /**
@@ -73,6 +73,7 @@ export const getAllConnectionData = AsyncHandler(async (req, res) => {
     }
     AllConnectionData = searchCandidate.connectionList;
     if (!AllConnectionData) {
+      throw new ApiError(404, "DbError : Connection list not found");
     }
   }
   return res
@@ -129,6 +130,7 @@ export const getAllReceivedConnectionRequest = AsyncHandler(
       connectionRequestReceivedList =
         searchEmployee.connectionRequestReceivedList;
       if (!connectionRequestReceivedList) {
+      throw new ApiError(404, "DbError : Connection request list not found");
       }
     } else if (req.userType === "Candidate") {
       // search Candidate Datils
@@ -149,6 +151,7 @@ export const getAllReceivedConnectionRequest = AsyncHandler(
       connectionRequestReceivedList =
         searchCandidate.connectionRequestReceivedList;
       if (!connectionRequestReceivedList) {
+      throw new ApiError(404, "DbError : Connection request list not found");
       }
     }
     return res
@@ -204,6 +207,7 @@ export const getAllSendConnectionRequest = AsyncHandler(async (req, res) => {
     }
     connectionRequestSendList = searchEmployee.connectionRequestSendList;
     if (!connectionRequestSendList) {
+      throw new ApiError(404, "DbError : Connection request list not found");
     }
   } else if (req.userType === "Candidate") {
     // search Candidate Datils
@@ -223,6 +227,7 @@ export const getAllSendConnectionRequest = AsyncHandler(async (req, res) => {
     }
     connectionRequestSendList = searchCandidate.connectionRequestSendList;
     if (!connectionRequestSendList) {
+      throw new ApiError(404, "DbError : Connection request list not found");
     }
   }
   return res
@@ -268,7 +273,7 @@ export const checkConnection = AsyncHandler(async (req, res) => {
     let searchEmployee;
     try {
       searchEmployee = await Employee.findById(req.userId).select(
-        "_id connectionList"
+        "_id connectionRequestSendList connectionRequestReceivedList connectionList"
       );
     } catch (error) {
       throw new ApiError(
@@ -281,6 +286,7 @@ export const checkConnection = AsyncHandler(async (req, res) => {
     }
     const connectionList = searchEmployee.connectionList;
     if (!connectionList) {
+      throw new ApiError(404, "DbError : Connection list not found");
     }
     if (
       connectionList.find(
@@ -358,6 +364,18 @@ export const sendConnectionRequest = AsyncHandler(async (req, res) => {
   if (!(req.params?.secondUserId && req.params?.secondUserType)) {
     throw new ApiError(404, "DataError : require params is not received");
   }
+  // user details object
+  const userDetails = {
+    userId: req.userId?.toString(),
+    userType: req.userType.toString(),
+    Date : new Date
+  };
+  const secondUserDetails = {
+    userId: req.params?.secondUserId?.toString(),
+    userType: req.params?.secondUserType,
+    Date : new Date
+  };
+  
   // check user type
   if (req.userType === "Employee") {
     // search Employee Datils
@@ -429,18 +447,6 @@ export const sendConnectionRequest = AsyncHandler(async (req, res) => {
       )
     ) {
     }
-    const userDetails = {
-      userId: searchEmployee._id,
-      fullName: searchEmployee.fullName,
-      userType: req.userType,
-      Date: Date.now(),
-    };
-    const secondUserDetails = {
-      userId: searchSecondUser._id,
-      fullName: searchSecondUser.fullName,
-      userType: req.params.secondUserType,
-      Date: Date.now(),
-    };
     let updateSearchEmployee;
     try {
       updateSearchEmployee = await Employee.findByIdAndUpdate(
@@ -550,18 +556,6 @@ export const sendConnectionRequest = AsyncHandler(async (req, res) => {
       )
     ) {
     }
-    const userDetails = {
-      userId: searchCandidate._id,
-      fullName: searchCandidate.fullName,
-      userType: req.userType,
-      Date: Date.now(),
-    };
-    const secondUserDetails = {
-      userId: searchSecondUser._id,
-      fullName: searchSecondUser.fullName,
-      userType: req.params.secondUserType,
-      Date: Date.now(),
-    };
     let updateSearchCandidate;
     try {
       updateSearchCandidate = await Candidate.findByIdAndUpdate(
@@ -639,6 +633,17 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
   if (!req.params?.responce){
     throw new ApiError(404, "DataError : responce params is not received");
   }
+  // user details object
+  const userDetails = {
+    userId: req.userId?.toString(),
+    userType: req.userType.toString(),
+    Date : new Date
+  };
+  const secondUserDetails = {
+    userId: req.params?.secondUserId?.toString(),
+    userType: req.params?.secondUserType,
+    Date : new Date
+  };  
   // check user type
   if (req.userType === "Employee") {
     // search Employee Datils
@@ -664,7 +669,7 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
     ) {
       throw new ApiError(
         404,
-        "DbError : secondUser id not exits in following request list"
+        "DbError : secondUser id not exits in connection request list"
       );
     }
     if (
@@ -675,7 +680,7 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
     ) {
       throw new ApiError(
         404,
-        "DbError : secondUser id already exits following list"
+        "DbError : secondUser id already exits connection list"
       );
     }
     let searchSecondUser;
@@ -684,7 +689,7 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
         searchSecondUser = await Employee.findById(
           req.params.secondUserId
         ).select(
-          "_id connectionList connectionRequestSendList"
+          "_id connectionRequestSendList connectionList"
         );
       } catch (error) {
         throw new ApiError(
@@ -697,7 +702,7 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
         searchSecondUser = await Candidate.findById(
           req.params.secondUserId
         ).select(
-          "_id connectionList connectionRequestSendList"
+          "_id connectionRequestSendList connectionList"
         );
       } catch (error) {
         throw new ApiError(
@@ -707,7 +712,7 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
       }
     }
     if (!searchSecondUser) {
-      throw new ApiError(404, "DataError : Second user Id not connect");
+      throw new ApiError(404, "DataError : Second user Id not correct");
     }
     if (
       searchSecondUser.connectionList?.find(
@@ -716,7 +721,7 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
     ) {
       throw new ApiError(
         404,
-        "DbError : User id already exits second user followers list"
+        "DbError : User id already exits second user Connection List"
       );
     }
     if (
@@ -726,33 +731,23 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
     ) {
       throw new ApiError(
         404,
-        "DbError : user id not exits in second user followers request list"
+        "DbError : user id not exits in second user connection request list"
       );
     }
     if (req.params?.responce === "Accept") {
-      // create object
-      const secondUserDetails = {
-        userId: searchSecondUser._id?.toString(),
-        fullname: searchSecondUser.fullName,
-        userType: req.params?.secondUserType,
-      };
-      const userDetails = {
-        userId: searchEmployee._id?.toString(),
-        fullName: searchEmployee.fullName,
-        userType: "Employee",
-      };
+      
       let updateSearchEmployee;
       try {
         updateSearchEmployee = await Employee.findByIdAndUpdate(
           searchEmployee._id?.toString(),
           {
             $push: {
-              followersList: secondUserDetails,
+              connectionList: secondUserDetails,
             },
           },
           { new: true }
         ).select(
-          "_id connectionList connectionRequestReceivedList connectionRequestSendList"
+          "_id connectionRequestSendList connectionRequestReceivedList connectionList"
         );
       } catch (error) {
         throw new ApiError(
@@ -770,12 +765,12 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
             searchSecondUser._id?.toString(),
             {
               $push: {
-                followingList: userDetails,
+                connectionList: userDetails,
               },
             },
             { new: true }
           ).select(
-            "_id followersList followersRequestList followingList followingRequestList"
+            "_id connectionRequestSendList connectionRequestReceivedList connectionList"
           );
         } catch (error) {
           throw new ApiError(
@@ -789,12 +784,12 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
             searchSecondUser._id?.toString(),
             {
               $push: {
-                followersList: userDetails,
+                connectionList: userDetails,
               },
             },
             { new: true }
           ).select(
-            "_id followersList followersRequestList followingList followingRequestList"
+            "_id connectionRequestSendList connectionRequestReceivedList connectionList"
           );
         } catch (error) {
           throw new ApiError(
@@ -804,21 +799,21 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
         }
       }
       if (!updateSearchSecondUser) {
-        throw new ApiError(500, "DbError Unable to update second user");
+        throw new ApiError(500, "DbError : second user not updated");
       }
       try {
-        const newFollowRequestList =
-          updateSearchEmployee.followersRequestList.filter(
+        const newConnectionRequestReceivedList =
+          updateSearchEmployee.connectionRequestReceivedList.filter(
             (userObject) =>
-              userObject.userId?.toString() !== updateSearchSecondUser
+              userObject.userId?.toString() !== updateSearchSecondUser._id?.toString()
           );
-        updateSearchEmployee.followersRequestList = newFollowRequestList;
+        updateSearchEmployee.connectionRequestReceivedList = newConnectionRequestReceivedList;
         await updateSearchEmployee.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
           `DbError : ${
-            error.message || "Unable to update Employee followers list"
+            error.message || "Unable to update Employee connection request list"
           }`
         );
       }
@@ -826,18 +821,18 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
         throw new ApiError(500, "DbError : Employee not updated");
       }
       try {
-        const newFollowingRequestList =
-          updateSearchSecondUser.followingRequestList.filter(
+        const newConnectionRequestSendList =
+          updateSearchSecondUser.connectionRequestReceivedList.filter(
             (userObject) =>
-              userObject.userId?.toString() !== updateSearchEmployee
+              userObject.userId?.toString() !== updateSearchEmployee._id?.toString()
           );
-        updateSearchEmployee.followingRequestList = newFollowingRequestList;
-        await updateSearchEmployee.save({ validateBeforeSave: false });
+        updateSearchSecondUser.connectionRequestSendList = newConnectionRequestSendList;
+        await updateSearchSecondUser.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
           `DbError : ${
-            error.message || "Unable to update second user following list"
+            error.message || "Unable to update second user connection request list"
           }`
         );
       }
@@ -848,21 +843,21 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
       return res
         .status(200)
         .json(
-          new ApiResponce(200, {}, "successMessage : Follow request accepted")
+          new ApiResponce(200, {}, "successMessage : connection request accepted")
         );
     } else if (req.params?.responce === "Reject") {
       try {
-        const newFollowRequestList = searchEmployee.followersRequestList.filter(
+        const newConnectionRequestReceivedList = searchEmployee.connectionRequestReceivedList.filter(
           (userObject) =>
             userObject.userId?.toString() !== searchSecondUser._id.toString()
         );
-        searchEmployee.followersRequestList = newFollowRequestList;
+        searchEmployee.connectionRequestReceivedList = newConnectionRequestReceivedList;
         await searchEmployee.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
           `DbError : ${
-            error.message || "Unable to update Employee followers list"
+            error.message || "Unable to update Employee connection request list"
           }`
         );
       }
@@ -870,18 +865,18 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
         throw new ApiError(500, "DbError : Employee not updated");
       }
       try {
-        const newFollowingRequestList =
-          searchSecondUser.followingRequestList.filter(
+        const newConnectionRequestSendList =
+          searchSecondUser.connectionRequestSendList.filter(
             (userObject) =>
               userObject.userId?.toString() !== searchEmployee._id.toString()
           );
-        searchEmployee.followingRequestList = newFollowingRequestList;
-        await searchEmployee.save({ validateBeforeSave: false });
+        searchSecondUser.connectionRequestSendList = newConnectionRequestSendList;
+        await searchSecondUser.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
           `DbError : ${
-            error.message || "Unable to update second user following list"
+            error.message || "Unable to update second user connection request list"
           }`
         );
       }
@@ -899,7 +894,7 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
     let searchCandidate;
     try {
       searchCandidate = await Candidate.findById(req.userId).select(
-        "_id followersList followersRequestList followingList followingRequestList"
+        "_id connectionRequestReceivedList connectionList"
       );
     } catch (error) {
       throw new ApiError(
@@ -911,25 +906,25 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DbError : Candidate not found");
     }
     if (
-      !searchCandidate.followersRequestList?.find(
+      !(searchCandidate.connectionRequestReceivedList?.find(
         (userObject) =>
           userObject.userId?.toString() === req.params.secondUserId
-      )
+      ))
     ) {
       throw new ApiError(
         404,
-        "DbError : secondUser id not exits in following request list"
+        "DbError : secondUser id not exits in connection request list"
       );
     }
     if (
-      searchCandidate.followersList?.find(
+      searchCandidate.connectionList?.find(
         (userObject) =>
           userObject.userId?.toString() === searchSecondUser._id?.toString()
       )
     ) {
       throw new ApiError(
         404,
-        "DbError : secondUser id already exits following list"
+        "DbError : secondUser id already exits connection list"
       );
     }
 
@@ -939,7 +934,7 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
         searchSecondUser = await Employee.findById(
           req.params.secondUserId
         ).select(
-          "_id followersList followersRequestList followingList followingRequestList"
+          "_id connectionRequestSendList connectionList"
         );
       } catch (error) {
         throw new ApiError(
@@ -952,7 +947,7 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
         searchSecondUser = await Candidate.findById(
           req.params.secondUserId
         ).select(
-          "_id followersList followersRequestList followingList followingRequestList"
+          "_id connectionRequestSendList connectionList"
         );
       } catch (error) {
         throw new ApiError(
@@ -962,7 +957,7 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
       }
     }
     if (!searchSecondUser) {
-      throw new ApiError(404, "DataError : Second user Id not connect");
+      throw new ApiError(404, "DataError : Second user Id not correct");
     }
     if (
       searchSecondUser.followingList?.find(
@@ -972,7 +967,7 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
     ) {
       throw new ApiError(
         404,
-        "DbError : User id already exits second user followers list"
+        "DbError : User id already exits second user connection list"
       );
     }
     if (
@@ -983,35 +978,23 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
     ) {
       throw new ApiError(
         404,
-        "DbError : user id not exits in second user followers request list"
+        "DbError : user id not exits in second user connection request list"
       );
     }
     if (req.params.responce === "Accept") {
-      // create object
-      const secondUserDetails = {
-        userId: searchSecondUser._id?.toString(),
-        fullname: searchSecondUser.fullName,
-        userType: req.params?.secondUserType,
-        Date: Date.now(),
-      };
-      const userDetails = {
-        userId: searchCandidate._id,
-        fullName: searchCandidate.fullName,
-        userType: "Candidate",
-        Date: Date.now(),
-      };
+      
       let updateSearchCandidate;
       try {
         updateSearchCandidate = await Candidate.findByIdAndUpdate(
           searchCandidate._id,
           {
             $push: {
-              followersList: secondUserDetails,
+              connectionList: secondUserDetails,
             },
           },
           { new: true }
         ).select(
-          "_id followersList followersRequestList followingList followingRequestList"
+          "_id connectionRequestSendList connectionRequestReceivedList connectionList"
         );
       } catch (error) {
         throw new ApiError(
@@ -1029,12 +1012,12 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
             searchSecondUser._id?.toString(),
             {
               $push: {
-                followingList: userDetails,
+                connectionList: userDetails,
               },
             },
             { new: true }
           ).select(
-            "_id followersList followersRequestList followingList followingRequestList"
+            "_id connectionRequestSendList connectionRequestReceivedList connectionList"
           );
         } catch (error) {
           throw new ApiError(
@@ -1048,12 +1031,12 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
             searchSecondUser._id?.toString(),
             {
               $push: {
-                followersList: userDetails,
+                connectionList: userDetails,
               },
             },
             { new: true }
           ).select(
-            "_id followersList followersRequestList followingList followingRequestList"
+            "_id connectionRequestSendList connectionRequestReceivedList connectionList"
           );
         } catch (error) {
           throw new ApiError(
@@ -1066,19 +1049,19 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
         throw new ApiError(500, "DbError Unable to update second user");
       }
       try {
-        const newFollowRequestList =
-          updateSearchCandidate.followersRequestList.filter(
+        const newConnectionRequestReceivedList =
+          updateSearchCandidate.connectionRequestReceivedList.filter(
             (userObject) =>
               userObject.userId?.toString() !==
               updateSearchSecondUser._id?.toString()
           );
-        updateSearchCandidate.followersRequestList = newFollowRequestList;
+        updateSearchCandidate.connectionRequestReceivedList = newConnectionRequestReceivedList;
         await updateSearchCandidate.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
           `DbError : ${
-            error.message || "Unable to update Candidate followers list"
+            error.message || "Unable to update Candidate connection list"
           }`
         );
       }
@@ -1086,19 +1069,19 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
         throw new ApiError(500, "DbError : Employee not updated");
       }
       try {
-        const newFollowingRequestList =
-          updateSearchSecondUser.followingRequestList.filter(
+        const newConnectionRequestSendList =
+          updateSearchSecondUser.newConnectionRequestSendList.filter(
             (userObject) =>
               userObject.userId?.toString() !==
               updateSearchCandidate._id?.toString()
           );
-        updateSearchCandidate.followingRequestList = newFollowingRequestList;
-        await updateSearchCandidate.save({ validateBeforeSave: false });
+        updateSearchSecondUser.connectionRequestSendList = newConnectionRequestSendList;
+        await updateSearchSecondUser.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
           `DbError : ${
-            error.message || "Unable to update second user following list"
+            error.message || "Unable to update second user connection request list"
           }`
         );
       }
@@ -1114,37 +1097,37 @@ export const responceOnConnectionRequest = AsyncHandler(async (req, res) => {
         );
     } else if (req.params.responce === "Reject") {
       try {
-        const newFollowRequestList =
-          searchCandidate.followersRequestList.filter(
+        const newConnectionRequestReceivedList =
+          searchCandidate.connectionRequestReceivedList.filter(
             (userObject) =>
               userObject.userId?.toString() !== searchSecondUser._id?.toString()
           );
-        searchCandidate.followersRequestList = newFollowRequestList;
+        searchCandidate.connectionRequestReceivedList = newConnectionRequestReceivedList;
         await searchCandidate.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
           `DbError : ${
-            error.message || "Unable to update Employee followers list"
+            error.message || "Unable to update Candidate connection list"
           }`
         );
       }
       if (!searchCandidate) {
-        throw new ApiError(500, "DbError : Employee not updated");
+        throw new ApiError(500, "DbError : Candidate not updated");
       }
       try {
-        const newFollowingRequestList =
-          searchSecondUser.followingRequestList.filter(
+        const newConnectionRequestSendList =
+          searchSecondUser.connectionRequestSendList.filter(
             (userObject) =>
               userObject.userId?.toString() !== searchCandidate._id?.toString()
           );
-        searchCandidate.followingRequestList = newFollowingRequestList;
-        await searchCandidate.save({ validateBeforeSave: false });
+        searchSecondUser.connectionRequestSendList = newConnectionRequestSendList;
+        await searchSecondUser.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
           `DbError : ${
-            error.message || "Unable to update second user following list"
+            error.message || "Unable to update second user connection request list"
           }`
         );
       }

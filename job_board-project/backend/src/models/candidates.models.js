@@ -76,18 +76,19 @@ const CandidatesSchema = new Schema(
         date: Date,
       },
     ],
-    connectionRequestSendList : [{
-      userId : {
-        type:String,
-        required : true,
-        unique : true
+    connectionRequestSendList: [
+      {
+        userId: {
+          type: String,
+          required: true,
+          unique: true,
+        },
+        userType: String,
+        Date: {
+          type: Date,
+        },
       },
-      userType : String,
-      fullName : String,
-      Date : {
-        type : Date
-      }
-    }],
+    ],
     connectionRequestReceivedList: [
       {
         userId: {
@@ -96,9 +97,8 @@ const CandidatesSchema = new Schema(
           unique: true,
         },
         userType: String,
-        fullName: String,
         Date: {
-          type: Date
+          type: Date,
         },
       },
     ],
@@ -110,9 +110,8 @@ const CandidatesSchema = new Schema(
           unique: true,
         },
         userType: String,
-        fullName: String,
         Date: {
-          type: Date
+          type: Date,
         },
       },
     ],
@@ -124,9 +123,8 @@ const CandidatesSchema = new Schema(
           unique: true,
         },
         userType: String,
-        fullName: String,
         Date: {
-          type: Date
+          type: Date,
         },
       },
     ],
@@ -138,9 +136,8 @@ const CandidatesSchema = new Schema(
           unique: true,
         },
         userType: String,
-        fullName: String,
         Date: {
-          type: Date
+          type: Date,
         },
       },
     ],
@@ -152,9 +149,8 @@ const CandidatesSchema = new Schema(
           unique: true,
         },
         userType: String,
-        fullName: String,
         Date: {
-          type: Date
+          type: Date,
         },
       },
     ],
@@ -166,9 +162,8 @@ const CandidatesSchema = new Schema(
           unique: true,
         },
         userType: String,
-        fullName: String,
         Date: {
-          type: Date
+          type: Date,
         },
       },
     ],

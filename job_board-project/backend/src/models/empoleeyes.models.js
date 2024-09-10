@@ -69,7 +69,6 @@ const EmployeeSchema = new Schema({
 			unique : true
 		},
 		userType : String,
-		fullName : String,
 		Date : {
 			type : Date
 		}
@@ -81,7 +80,6 @@ const EmployeeSchema = new Schema({
 			unique : true
 		},
 		userType : String,
-		fullName : String,
 		Date : {
 			type : Date
 		}
@@ -93,7 +91,6 @@ const EmployeeSchema = new Schema({
 			unique : true
 		},
 		userType : String,
-		fullName : String,
 		Date : {
 			type : Date
 		}
@@ -105,7 +102,6 @@ const EmployeeSchema = new Schema({
 			unique : true
 		},
 		userType : String,
-		fullName : String,
 		Date : {
 			type : Date
 		}
@@ -117,7 +113,6 @@ const EmployeeSchema = new Schema({
 			unique : true
 		},
 		userType : String,
-		fullName : String,
 		Date : {
 			type : Date
 		}
@@ -129,7 +124,6 @@ const EmployeeSchema = new Schema({
 			unique : true
 		},
 		userType : String,
-		fullName : String,
 		Date : {
 			type : Date
 		}
@@ -141,7 +135,6 @@ const EmployeeSchema = new Schema({
 			unique : true
 		},
 		userType : String,
-		fullName : String,
 		Date : {
 			type : Date
 		}

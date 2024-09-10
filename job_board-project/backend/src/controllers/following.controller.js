@@ -18,6 +18,7 @@ import ApiError from "../utils/ApiError.js";
 import Employee from "../models/empoleeyes.models.js";
 import Candidate from "../models/candidates.models.js";
 
+
 export const getAllFollowingData = AsyncHandler(async (req, res) => {
   /**
    * check user is logged in
@@ -1235,6 +1236,18 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
   if (!(req.params?.secondUserId && req.params?.secondUserType)) {
     throw new ApiError(404, "DataError : Parameters not received");
   }
+  // User details object
+  const userDetails = {
+    userId: req.userId?.toString(),
+    userType: req.userType.toString(),
+    Date : new Date
+  };
+  const secondUserDetails = {
+    userId: req.params?.secondUserId?.toString(),
+    userType: req.params?.secondUserType,
+    Date : new Date
+  };
+  
   // check user type
   if (req.userType === "Employee") {
     // search Employee Datils
@@ -1305,18 +1318,6 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
     if (!searchSecondUser) {
       throw new ApiError(404, "DataError : Second user Id not connect");
     }
-    const secondUserDetails = {
-      userId: searchSecondUser._id?.toString(),
-      fullname: searchSecondUser.fullName,
-      userType: req.params?.secondUserType,
-      Date: Date.now(),
-    };
-    const userDetails = {
-      userId: searchEmployee._id?.toString(),
-      fullName: searchEmployee.fullName,
-      userType: "Employee",
-      Date: Date.now(),
-    };
     let updateSearchEmployee;
     try {
       updateSearchEmployee = await Employee.findByIdAndUpdate(
@@ -1461,16 +1462,6 @@ export const sendFollowRequest = AsyncHandler(async (req, res) => {
     if (!searchSecondUser) {
       throw new ApiError(404, "DataError : Second user Id not connect");
     }
-    const secondUserDetails = {
-      userId: searchSecondUser._id?.toString(),
-      fullname: searchSecondUser.fullName,
-      userType: req.params?.secondUserType,
-    };
-    const userDetails = {
-      userId: searchCandidate._id,
-      fullName: searchCandidate.fullName,
-      userType: "Candidate",
-    };
     let updateSearchEmployee;
     try {
       updateSearchEmployee = await Employee.findByIdAndUpdate(
@@ -1576,6 +1567,18 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
   if (!(req.params?.secondUserId && req.params?.secondUserType)) {
     throw new ApiError(404, "DataError : Parameters not received");
   }
+  
+  // User details object
+  const userDetails = {
+    userId: req.userId?.toString(),
+    userType: req.userType.toString(),
+    Date : new Date
+  };
+  const secondUserDetails = {
+    userId: req.params?.secondUserId?.toString(),
+    userType: req.params?.secondUserType,
+    Date : new Date
+  };
   if (!req.params?.responce) {
     throw new ApiError(404, "DataError : Responce Parameters not received");
   }
@@ -1670,17 +1673,7 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       );
     }
     if (req.params?.responce === "Accept") {
-      // create object
-      const secondUserDetails = {
-        userId: searchSecondUser._id?.toString(),
-        fullname: searchSecondUser.fullName,
-        userType: req.params?.secondUserType,
-      };
-      const userDetails = {
-        userId: searchEmployee._id?.toString(),
-        fullName: searchEmployee.fullName,
-        userType: "Employee",
-      };
+      
       let updateSearchEmployee;
       try {
         updateSearchEmployee = await Employee.findByIdAndUpdate(
@@ -1750,7 +1743,7 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
         const newFollowRequestList =
           updateSearchEmployee.followersRequestList.filter(
             (userObject) =>
-              userObject.userId?.toString() !== updateSearchSecondUser
+              userObject.userId?.toString() !== updateSearchSecondUser._id?.toString()
           );
         updateSearchEmployee.followersRequestList = newFollowRequestList;
         await updateSearchEmployee.save({ validateBeforeSave: false });
@@ -1769,10 +1762,10 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
         const newFollowingRequestList =
           updateSearchSecondUser.followingRequestList.filter(
             (userObject) =>
-              userObject.userId?.toString() !== updateSearchEmployee
+              userObject.userId?.toString() !== updateSearchEmployee._id?.toString()
           );
-        updateSearchEmployee.followingRequestList = newFollowingRequestList;
-        await updateSearchEmployee.save({ validateBeforeSave: false });
+        updateSearchSecondUser.followingRequestList = newFollowingRequestList;
+        await updateSearchSecondUser.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
@@ -1815,8 +1808,8 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
             (userObject) =>
               userObject.userId?.toString() !== searchEmployee._id.toString()
           );
-        searchEmployee.followingRequestList = newFollowingRequestList;
-        await searchEmployee.save({ validateBeforeSave: false });
+        searchSecondUser.followingRequestList = newFollowingRequestList;
+        await searchSecondUser.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
@@ -1927,19 +1920,7 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
       );
     }
     if (req.params.responce === "Accept") {
-      // create object
-      const secondUserDetails = {
-        userId: searchSecondUser._id?.toString(),
-        fullname: searchSecondUser.fullName,
-        userType: req.params?.secondUserType,
-        Date: Date.now(),
-      };
-      const userDetails = {
-        userId: searchCandidate._id,
-        fullName: searchCandidate.fullName,
-        userType: "Candidate",
-        Date: Date.now(),
-      };
+    
       let updateSearchCandidate;
       try {
         updateSearchCandidate = await Candidate.findByIdAndUpdate(
@@ -2032,8 +2013,8 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
               userObject.userId?.toString() !==
               updateSearchCandidate._id?.toString()
           );
-        updateSearchCandidate.followingRequestList = newFollowingRequestList;
-        await updateSearchCandidate.save({ validateBeforeSave: false });
+        updateSearchSecondUser.followingRequestList = newFollowingRequestList;
+        await updateSearchSecondUser.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
@@ -2078,8 +2059,8 @@ export const responceOnFollowRequest = AsyncHandler(async (req, res) => {
             (userObject) =>
               userObject.userId?.toString() !== searchCandidate._id?.toString()
           );
-        searchCandidate.followingRequestList = newFollowingRequestList;
-        await searchCandidate.save({ validateBeforeSave: false });
+        searchSecondUser.followingRequestList = newFollowingRequestList;
+        await searchSecondUser.save({ validateBeforeSave: false });
       } catch (error) {
         throw new ApiError(
           500,
