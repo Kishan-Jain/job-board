@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "test": "nodemon -r dotenv/config src/server"
+    "test": "nodemon -r dotenv/config src/server",
+    "start": "node -r dotenv/config src/server"
   },
   "keywords": [
     "codesoft",
-    "job_board"
+    "job_board",
+    "backend"
   ],
   "type": "module",
   "author": "kishan jain",
