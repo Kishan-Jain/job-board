@@ -4,7 +4,7 @@
   "main": "server.js",
   "scripts": {
     "test": "nodemon -r dotenv/config src/server",
-    "start": "node -r dotenv/config src/server"
+    "start" : "node -r dotenv/config src/server"
   },
   "keywords": [
     "codesoft",

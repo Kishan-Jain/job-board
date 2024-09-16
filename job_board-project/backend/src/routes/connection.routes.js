@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {isLogin} from "../middlewares/auth.middlewares.js"
-import { brackConnection, cancelConnectionSendRequest, checkConnection, getAllReceivedConnectionRequest, getAllSendConnectionRequest, responceOnConnectionRequest, sendConnectionRequest } from "../controllers/connection.controller.js"
+import { brackConnection, cancelConnectionSendRequest, checkConnection, getAllConnections, getAllReceivedConnectionRequest, getAllSendConnectionRequest, responceOnConnectionRequest, sendConnectionRequest } from "../controllers/connection.controller.js"
 
 const connectionRouter = Router()
 
@@ -13,7 +13,9 @@ connectionRouter.route("/:userType/:userId/getAllReceivedConnectionRequest").get
 connectionRouter.route("/:userType/:userId/getAllSendConnectionRequest").get(
   isLogin, getAllSendConnectionRequest
 )
-
+connectionRouter.route("/:userType/:userId/getAllConnections").get(
+  isLogin, getAllConnections
+)
 connectionRouter.route("/:userType/:userId/sendConnectionRequest/:secondUserType/:secondUserId").post(
   isLogin, sendConnectionRequest
 )

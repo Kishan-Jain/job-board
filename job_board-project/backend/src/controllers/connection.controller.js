@@ -13,7 +13,7 @@ import ApiResponce from "../utils/ApiResponce.js";
 import Employee from "../models/empoleeyes.models.js";
 import Candidate from "../models/candidates.models.js";
 
-export const getAllConnectionData = AsyncHandler(async (req, res) => {
+export const getAllConnections = AsyncHandler(async (req, res) => {
   /**
    * check user is logged in
    * validate user
@@ -54,6 +54,7 @@ export const getAllConnectionData = AsyncHandler(async (req, res) => {
     }
     AllConnectionData = searchEmployee.connectionList;
     if (!AllConnectionData) {
+      throw new ApiError(400, "DbError : Connection array not found");
     }
   } else if (req.userType === "Candidate") {
     // search Candidate Datils
@@ -73,7 +74,7 @@ export const getAllConnectionData = AsyncHandler(async (req, res) => {
     }
     AllConnectionData = searchCandidate.connectionList;
     if (!AllConnectionData) {
-      throw new ApiError(404, "DbError : Connection list not found");
+      throw new ApiError(404, "DbError : Connection Array not found");
     }
   }
   return res
@@ -81,7 +82,7 @@ export const getAllConnectionData = AsyncHandler(async (req, res) => {
     .json(
       new ApiResponce(
         200,
-        All,
+        AllConnectionData,
         "successMessage : received All send connection request"
       )
     );
@@ -1173,7 +1174,7 @@ export const brackConnection = AsyncHandler(async (req, res) => {
     let searchEmployee;
     try {
       searchEmployee = await Employee.findById(req.userId).select(
-        "followingList"
+        "connectionList"
       );
     } catch (error) {
       throw new ApiError(
@@ -1185,23 +1186,29 @@ export const brackConnection = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DataError : Employee not found");
     }
     if (
-      !searchEmployee.connectionList?.find(
+      !(searchEmployee.connectionList?.find(
         (userObject) =>
           userObject.userId?.toString() === req.params?.secondUserId
       )
-    ) {
+    )) {
+      throw new ApiError(400, "DataError : second user id not exits in user connection array");
     }
     let searchSecondUser;
     if (req.params?.secondUserType === "Employee") {
       try {
-        searchSecondUser = await Employee.findById(req.params?.secondUserId);
-      } catch (error) {}
+        searchSecondUser = await Employee.findById(req.params?.secondUserId).select("connectionList");
+      } catch (error) {
+      throw new ApiError(500, `DbError : ${error.message || "Unable to find second user"}`);
+      }
     } else if (req.params?.secondUserType === "Candidate") {
       try {
-        searchSecondUser = await Candidate.findById(req.params?.secondUserId);
-      } catch (error) {}
+        searchSecondUser = await Candidate.findById(req.params?.secondUserId).select("connectionList");
+      } catch (error) {
+      throw new ApiError(500, `DbError : ${error.message || "Unable to find second user"}`);
+      }
     }
     if (!searchSecondUser) {
+      throw new ApiError(404, "DataError : Second user id not correct");
     }
     if (
       !searchSecondUser.connectionList?.find(
@@ -1209,49 +1216,62 @@ export const brackConnection = AsyncHandler(async (req, res) => {
           userObject.userId?.toString() === searchEmployee._id?.toString()
       )
     ) {
+      throw new ApiError(400, "DataError : user id not exits in user connection array");
     }
     try {
       const newConnectionList = searchEmployee.connectionList.filter(
         (userObject) =>
-          userObject.userId?.toString !== searchSecondUser._id?.toString
+          userObject.userId?.toString() !== searchSecondUser._id?.toString()
       );
       searchEmployee.connectionList = newConnectionList;
       await searchEmployee.save({ validateBeforeSave: false });
-    } catch (error) {}
+    } catch (error) {
+      throw new ApiError(500, `DbError : ${error.message || "Unable to update user connection list"}`);
+    }
     let updateSearchEmployee;
     try {
-      updateSearchEmployee = await Employee.findById(searchEmployee._id);
-    } catch (error) {}
-    if (!updateSearchEmployee) {
+      updateSearchEmployee = await Employee.findById(searchEmployee._id).select("connectionList");
+    } catch (error) {
+      throw new ApiError(500, `DbError : ${error.message || "Unable to find updated employee"}`);
+
     }
-    try {
-    } catch (error) {}
+    if (!updateSearchEmployee) {
+      throw new ApiError(404, "DataError : updated Employee not found");
+    }
     try {
       const newConnectionList = searchSecondUser.connectionList.filter(
         (userObject) =>
-          userObject.userId?.toString !== searchEmployee._id?.toString
+          userObject.userId?.toString() !== searchEmployee._id?.toString()
       );
       searchSecondUser.connectionList = newConnectionList;
       await searchSecondUser.save({ validateBeforeSave: false });
-    } catch (error) {}
+    } catch (error) {
+      throw new ApiError(500, `DbError : ${error.message || "Unable to second user update connection list"}`);
+    }
     let updateSearchSecondUser;
     if (req.params?.secondUserType === "Employee") {
       try {
-        updateSearchSecondUser = await Employee.findById(searchSecondUser._id);
-      } catch (error) {}
+        updateSearchSecondUser = await Employee.findById(searchSecondUser._id).select("connectionList");
+      } catch (error) {
+      throw new ApiError(500, `DbError : ${error.message || "Unable to find updated second user"}`);
+      }
     } else if (req.params?.searchSecondUser === "Candidate") {
       try {
         updateSearchSecondUser = await Candidate.findById(searchSecondUser._id);
-      } catch (error) {}
+      } catch (error) {
+      throw new ApiError(500, `DbError : ${error.message || "Unable to find updated second user"}`);
+      }
     }
     if (!updateSearchSecondUser) {
+      throw new ApiError(500, "DbError : updated second user not find");
     }
-  } else if (req.userType === "Candidate") {
+  }
+  else if (req.userType === "Candidate") {
     // search Candidate Datils
     let searchCandidate;
     try {
       searchCandidate = await Candidate.findById(req.userId).select(
-        "followingList"
+        "connectionList"
       );
     } catch (error) {
       throw new ApiError(
@@ -1263,65 +1283,84 @@ export const brackConnection = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DataError : Candidate not found");
     }
     if (
-      !searchCandidate.connectionList?.find(
+      !(searchCandidate.connectionList?.find(
         (userObject) =>
           userObject.userId?.toString() === req.params?.secondUserId
-      )
+      ))
     ) {
+      throw new ApiError(404, "DataError : second user id not exits in user connection list");
     }
 
     let searchSecondUser;
     if (req.params?.secondUserType === "Employee") {
       try {
         searchSecondUser = await Employee.findById(req.params?.secondUserId);
-      } catch (error) {}
+      } catch (error) {
+      throw new ApiError(500, `DbError : ${error.message || "Unable to find second user"}`);
+      }
     } else if (req.params?.secondUserType === "Candidate") {
       try {
         searchSecondUser = await Candidate.findById(req.params?.secondUserId);
-      } catch (error) {}
+      } catch (error) {
+      throw new ApiError(500, `DbError ${error.message || "Unable to find second user"}`);
+      }
     }
     if (!searchSecondUser) {
+      throw new ApiError(404, "DataError : second user not found");
     }
     if (
-      !searchSecondUser.connectionList?.find(
+      !(searchSecondUser.connectionList?.find(
         (userObject) =>
           userObject.userId?.toString() === searchCandidate._id?.toString()
-      )
+      ))
     ) {
+      throw new ApiError(400, "DataError : second user id not exits in user connection list");
     }
     try {
       const newConnectionList = searchCandidate.connectionList.filter(
         (userObject) =>
-          userObject.userId?.toString !== searchSecondUser._id?.toString
+          userObject.userId?.toString() !== searchSecondUser._id?.toString()
       );
       searchCandidate.connectionList = newConnectionList;
       await searchCandidate.save({ validateBeforeSave: false });
-    } catch (error) {}
+    } catch (error) {
+      throw new ApiError(500, `DbError : ${error.message || "Unable to update user connection list"}`);
+    }
     let updateSearchCandidate;
     try {
-      updateSearchCandidate = await Candidate.findById(searchCandidate._id);
-    } catch (error) {}
+      updateSearchCandidate = await Candidate.findById(searchCandidate._id).select("connectionList");
+    } catch (error) {
+      throw new ApiError(500, `DbError : ${error.message || "Unable to find update user"}`);
+    }
     if (!updateSearchCandidate) {
+      throw new ApiError(500, "DbError : Updated user not found");
     }
     try {
       const newConnectionList = searchSecondUser.connectionList.filter(
         (userObject) =>
-          userObject.userId?.toString !== searchCandidate._id?.toString
+          userObject.userId?.toString() !== searchCandidate._id?.toString()
       );
       searchSecondUser.connectionList = newConnectionList;
       await searchSecondUser.save({ validateBeforeSave: false });
-    } catch (error) {}
+    } catch (error) {
+      throw new ApiError(500, `DbError : ${error.message || "Unable to update second user connection list"}`);
+    }
     let updateSearchSecondUser;
     if (req.params?.secondUserType === "Employee") {
       try {
-        updateSearchSecondUser = await Employee.findById(searchSecondUser._id);
-      } catch (error) {}
+        updateSearchSecondUser = await Employee.findById(searchSecondUser._id).select("connectionList");
+      } catch (error) {
+      throw new ApiError(500, `DbError : ${error.message || "Unable to find updated second user"}`);
+      }
     } else if (req.params?.searchSecondUser === "Candidate") {
       try {
         updateSearchSecondUser = await Candidate.findById(searchSecondUser._id);
-      } catch (error) {}
+      } catch (error) {
+      throw new ApiError(500, `DbError : ${error.message || "Unable to find updated second user"}`);
+      }
     }
     if (!updateSearchSecondUser) {
+      throw new ApiError(500, "DbError : updated second user not found");
     }
   }
   return res
@@ -1373,10 +1412,10 @@ export const cancelConnectionSendRequest = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "DataError : Employee not found");
     }
     if (
-      !searchEmployee.connectionRequestSendList?.find(
+      !(searchEmployee.connectionRequestSendList?.find(
         (userObject) =>
           userObject.userId?.toString() === req.params?.secondUserId
-      )
+      ))
     ) {
     }
     if (
@@ -1406,10 +1445,10 @@ export const cancelConnectionSendRequest = AsyncHandler(async (req, res) => {
     ) {
     }
     if (
-      !searchSecondUser.connectionRequestReceivedList?.find(
+      !(searchSecondUser.connectionRequestReceivedList?.find(
         (userObject) =>
           userObject.userId?.toString() === searchEmployee._id?.toString()
-      )
+      ))
     ) {
     }
     try {
